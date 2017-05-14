@@ -1,6 +1,6 @@
 from django.conf.urls import url
-from . import views
+from .views import rssfeed
 
 urlpatterns = [
-    url(r'', views.RssFeed(), name='feed')
+    url(r'', rssfeed.RssFeed(), name='feed')
 ]
