@@ -11,7 +11,7 @@ class NewsItem(models.Model):
     description = models.TextField()
     source = models.ForeignKey(Source, null=True)
     url = models.URLField(null=True)
-    score = models.IntegerField()
+    score = models.DecimalField(decimal_places=2, max_digits=2)
     added_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):

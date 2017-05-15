@@ -13,7 +13,7 @@ class RssFeed(Feed):
     link = reverse_lazy('rss:feed')
 
     def items(self):
-        return NewsItem.objects.order_by('-added_at')[:50]
+        return NewsItem.objects.filter(score__gte=0.5).order_by('-added_at')[:50]
 
     def item_title(self, item):
         return item.title
@@ -23,3 +23,6 @@ class RssFeed(Feed):
 
     def item_link(self, item):
         return item.url
+
+    def item_pubdate(self, item):
+        return item.added_at
