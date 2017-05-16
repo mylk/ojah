@@ -13,7 +13,9 @@ class RssFeed(Feed):
     link = reverse_lazy('rss:feed')
 
     def items(self):
-        return NewsItem.objects.filter(score__gte=0.5).order_by('-added_at')[:50]
+        return NewsItem.objects.filter(
+            score__gte=settings.RSS_FEED_SENTIMENT_POLARITY_THRESHOLD
+        ).order_by('-added_at')[:50]
 
     def item_title(self, item):
         return item.title
