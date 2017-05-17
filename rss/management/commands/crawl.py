@@ -49,4 +49,6 @@ class Command(BaseCommand):
             news_item.added_at = entry['updated']
             news_item.save()
 
+            source.crawled()
+
         self.stdout.write(self.style.SUCCESS('Successfully crawled \'%s\'' % source.name))
