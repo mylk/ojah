@@ -35,6 +35,9 @@ class Command(BaseCommand):
         for entry in feed['entries']:
             description = entry['summary'] if 'summary' in entry else entry['title']
 
+            if NewsItem.exists(entry['title'], entry['updated'], source):
+                continue
+
             score = TextBlob(entry['title']).sentiment.polarity
 
             news_item = NewsItem()
