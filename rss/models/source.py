@@ -15,4 +15,4 @@ class Source(models.Model):
         self.save()
 
     def __str__(self):
-        return self.url
+        return self.name

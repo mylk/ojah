@@ -120,6 +120,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-RSS_FEED_TITLE = 'Ojah. the positive news aggregator'
+RSS_FEED_TITLE = 'Ojah, the positive news aggregator'
 RSS_FEED_DESCRIPTION = 'Most positive news of the internet in one feed!'
 RSS_FEED_SENTIMENT_POLARITY_THRESHOLD = 0.5
+RSS_FEED_NEWS_ITEMS_COUNT = 50

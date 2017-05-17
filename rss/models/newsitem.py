@@ -19,5 +19,9 @@ class NewsItem(models.Model):
         news_items_existing = NewsItem.objects.filter(title=title, added_at=added_at, source=source)
         return len(news_items_existing) > 0
 
+    @staticmethod
+    def find_by_score(score_threshold, news_items_count):
+        return NewsItem.objects.filter(score__gte=score_threshold).order_by('-added_at')[:news_items_count]
+
     def __str__(self):
         return self.title
