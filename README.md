@@ -28,7 +28,6 @@ Use the application
 Currently, ```Ojah!``` is not served through the internet, but of course you can clone it and then use, distribute, or
 hack it. To make it run on your computer:
 
-- Download Django using your package manager
 - Clone the application
 - Install the dependencies of the project:
 
