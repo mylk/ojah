@@ -63,3 +63,24 @@ The default username is ```ojah``` and the password is ```ojah``` too.
 ```
 http://127.0.0.1:8000/rss
 ```
+
+Run in container
+----------------
+
+Build the image:
+
+```
+docker build -t mylkohrly/ojah .
+```
+
+Start a container using the above image:
+
+```
+docker run -d -p 8000:8000 mylkohrly/ojah
+```
+
+You can still visit the application pointing to your host:
+
+```
+http://127.0.0.1:8000/rss
+```

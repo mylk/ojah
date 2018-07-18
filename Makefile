@@ -1,8 +1,8 @@
 deps:
-	sudo pip install -r requirements
+	pip install -r requirements.txt
 
-deps-dev:
-	sudo pip install -r requirements_dev
+deps_dev:
+	pip install -r requirements_dev.txt
 
 init:
 	./manage.py makemigrations
