@@ -1,5 +1,6 @@
 deps:
 	pip install -r requirements.txt
+	python -m textblob.download_corpora
 	python -m nltk.downloader twitter_samples
 
 deps_dev:
