@@ -1,12 +1,15 @@
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from rss.models.source import Source
 from rss.models.newsitem import NewsItem
 import feedparser
-from textblob import TextBlob
+from textblob.classifiers import NaiveBayesClassifier
+from nltk.corpus import twitter_samples
+from random import shuffle
 
 
 class Command(BaseCommand):
     help = 'Crawl RSS feeds and perform sentiment analysis on news items'
+    classifier = None
 
     def add_arguments(self, parser):
         parser.add_argument('name', nargs='?', type=str)
@@ -24,12 +27,31 @@ class Command(BaseCommand):
         for source in sources:
             self.crawl(source)
 
-    def crawl(self, source):
-        self.stdout.write('Crawling \'%s\'...' % source.name)
+    def get_classifier(self):
+        if self.classifier is not None:
+            return self.classifier
 
+        tweets_pos = twitter_samples.strings('positive_tweets.json')[:200]
+        tweets_neg = twitter_samples.strings('negative_tweets.json')[:200]
+        tweets_classified = list()
+        for tweet in tweets_pos:
+            tweets_classified.append((tweet, 'pos'))
+        for tweet in tweets_neg:
+            tweets_classified.append((tweet, 'neg'))
+        shuffle(tweets_classified)
+
+        self.classifier = NaiveBayesClassifier(tweets_classified)
+        return self.classifier
+
+    def crawl(self, source):
+        self.stdout.write('Training classifier...')
+        classifier = self.get_classifier()
+        self.stdout.write('Classifier is ready!')
+
+        self.stdout.write('Crawling \'%s\'...' % source.name)
         try:
             feed = feedparser.parse(source.url)
-        except:
+        except RuntimeError:
             self.stdout.write(self.style.ERROR('Could not crawl \'%s\'' % source.name))
 
         for entry in feed['entries']:
@@ -38,7 +60,7 @@ class Command(BaseCommand):
             if NewsItem.exists(entry['title'], entry['updated'], source):
                 continue
 
-            score = TextBlob(entry['title']).sentiment.polarity
+            score = 1 if classifier.classify(entry['title']) == 'pos' else 0
 
             news_item = NewsItem()
             news_item.title = entry['title']
