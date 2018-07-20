@@ -1,11 +1,12 @@
 from django.core.management.base import BaseCommand
 from rss.models.source import Source
 from rss.models.newsitem import NewsItem
+from rss.models.corpus import Corpus
 import feedparser
 from textblob.classifiers import NaiveBayesClassifier
 from nltk.corpus import twitter_samples
 from random import shuffle
-
+import sys
 
 class Command(BaseCommand):
     help = 'Crawl RSS feeds and perform sentiment analysis on news items'
@@ -31,16 +32,23 @@ class Command(BaseCommand):
         if self.classifier is not None:
             return self.classifier
 
-        tweets_pos = twitter_samples.strings('positive_tweets.json')[:200]
-        tweets_neg = twitter_samples.strings('negative_tweets.json')[:200]
-        tweets_classified = list()
-        for tweet in tweets_pos:
-            tweets_classified.append((tweet, 'pos'))
-        for tweet in tweets_neg:
-            tweets_classified.append((tweet, 'neg'))
-        shuffle(tweets_classified)
+        corpora_classified = list()
 
-        self.classifier = NaiveBayesClassifier(tweets_classified)
+        # train with twitter samples corpora
+        tweets_pos = twitter_samples.strings('positive_tweets.json')[:200]
+        for tweet in tweets_pos:
+            corpora_classified.append((tweet, 'pos'))
+        tweets_neg = twitter_samples.strings('negative_tweets.json')[:200]
+        for tweet in tweets_neg:
+            corpora_classified.append((tweet, 'neg'))
+        shuffle(corpora_classified)
+
+        # train with our corpora
+        corpora = Corpus.objects.all()
+        for corpus in corpora:
+            corpora_classified.insert(0, (corpus.news_item.title, corpus.get_classification()))
+
+        self.classifier = NaiveBayesClassifier(corpora_classified)
         return self.classifier
 
     def crawl(self, source):
@@ -53,6 +61,7 @@ class Command(BaseCommand):
             feed = feedparser.parse(source.url)
         except RuntimeError:
             self.stdout.write(self.style.ERROR('Could not crawl \'%s\'' % source.name))
+            sys.exit(1)
 
         for entry in feed['entries']:
             description = entry['summary'] if 'summary' in entry else entry['title']
