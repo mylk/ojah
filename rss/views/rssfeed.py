@@ -13,7 +13,7 @@ class RssFeed(Feed):
     link = reverse_lazy('rss:feed')
 
     def items(self):
-        return NewsItem.find_by_score(
+        return NewsItem.find_positive(
             settings.RSS_FEED_SENTIMENT_POLARITY_THRESHOLD,
             settings.RSS_FEED_NEWS_ITEMS_COUNT
         )

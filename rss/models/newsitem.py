@@ -20,8 +20,15 @@ class NewsItem(models.Model):
         return len(news_items_existing) > 0
 
     @staticmethod
-    def find_by_score(score_threshold, news_items_count):
-        return NewsItem.objects.filter(score__gte=score_threshold).order_by('-added_at')[:news_items_count]
+    def find_positive(score_threshold, news_items_count):
+        return \
+            NewsItem.objects \
+            .filter(score__gte=score_threshold) \
+            .exclude(
+                id__in=NewsItem._meta.get_field('corpus')
+                .remote_field.model.objects.filter(positive=False)
+                .values('news_item')
+            ).order_by('-added_at')[:news_items_count]
 
     def __str__(self):
         return self.title
