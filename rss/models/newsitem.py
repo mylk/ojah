@@ -21,14 +21,24 @@ class NewsItem(models.Model):
 
     @staticmethod
     def find_positive(score_threshold, news_items_count):
-        return \
-            NewsItem.objects \
-            .filter(score__gte=score_threshold) \
-            .exclude(
-                id__in=NewsItem._meta.get_field('corpus')
-                .remote_field.model.objects.filter(positive=False)
-                .values('news_item')
-            ).order_by('-added_at')[:news_items_count]
+        return NewsItem.objects.raw('''
+            SELECT *
+            FROM news_item
+            WHERE (
+              score > %s
+              AND id NOT IN (
+                SELECT news_item_id
+                FROM corpus
+                WHERE positive = 0
+              )
+            ) OR id IN (
+                SELECT news_item_id
+                FROM corpus
+                WHERE positive = 1
+            )
+            ORDER BY added_at DESC
+            LIMIT %s
+        ''', [score_threshold, news_items_count])
 
     def __str__(self):
         return self.title
