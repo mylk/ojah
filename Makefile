@@ -10,3 +10,4 @@ init:
 	./manage.py makemigrations
 	./manage.py migrate
 	./manage.py loaddata initial_data
+	./manage.py collectstatic --no-input
