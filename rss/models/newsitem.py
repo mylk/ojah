@@ -12,6 +12,7 @@ class NewsItem(models.Model):
     source = models.ForeignKey(Source, null=True, on_delete=models.DO_NOTHING)
     url = models.URLField(null=True)
     score = models.DecimalField(decimal_places=2, max_digits=10)
+    published = models.BooleanField(default=False, null=False)
     added_at = models.DateTimeField(default=timezone.now)
 
     @staticmethod
@@ -31,11 +32,13 @@ class NewsItem(models.Model):
                 FROM corpus
                 WHERE positive = 0
               )
+              AND published = 1
             ) OR id IN (
                 SELECT news_item_id
                 FROM corpus
                 WHERE positive = 1
             )
+            AND published = 1
             ORDER BY added_at DESC
             LIMIT %s
         ''', [score_threshold, news_items_count])

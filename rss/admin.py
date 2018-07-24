@@ -5,7 +5,7 @@ from .models.corpus import Corpus
 
 
 class NewsItemAdmin(admin.ModelAdmin):
-    list_display = ('title', 'source', 'score')
+    list_display = ('title', 'source', 'score', 'published')
     list_filter = ['score']
     search_fields = ['title']
     ordering = ['-added_at']
