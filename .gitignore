@@ -1,6 +1,8 @@
 .idea/
-static/
+static/*
 
 *.pyc
 __pycache__
 db.sqlite3
+
+!static/.gitkeep
