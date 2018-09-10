@@ -25,7 +25,7 @@ SECRET_KEY = 'wer%z@ii(*&)*1f9$bft^1d=*9aocg&l30lhpp7oj52)0(hwez'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'ojah.io']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'ojah.io', 'www.ojah.io']
 
 # Application definition
 
@@ -164,4 +164,4 @@ LOGGING = {
 RSS_FEED_TITLE = 'Ojah, the positive news aggregator'
 RSS_FEED_DESCRIPTION = 'Most positive news of the internet in one feed!'
 RSS_FEED_SENTIMENT_POLARITY_THRESHOLD = 0.5
-RSS_FEED_NEWS_ITEMS_COUNT = 50
+RSS_FEED_NEWS_ITEMS_COUNT = 250

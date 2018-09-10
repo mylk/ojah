@@ -11,7 +11,7 @@ class SourceAdmin(admin.ModelAdmin):
 
 class NewsItemAdmin(admin.ModelAdmin):
     list_display = ('title', 'source', 'score', 'published', 'added_at')
-    list_filter = ['score', 'source']
+    list_filter = ['score', 'published', 'source']
     search_fields = ['title']
     ordering = ['-added_at']
 
