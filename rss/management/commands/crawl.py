@@ -34,16 +34,7 @@ class Command(BaseCommand):
 
         corpora_classified = list()
 
-        # train with twitter samples corpora
-        tweets_pos = twitter_samples.strings('positive_tweets.json')[:200]
-        for tweet in tweets_pos:
-            corpora_classified.append((tweet, 'pos'))
-        tweets_neg = twitter_samples.strings('negative_tweets.json')[:200]
-        for tweet in tweets_neg:
-            corpora_classified.append((tweet, 'neg'))
-        shuffle(corpora_classified)
-
-        # train with our corpora
+        # train with custom corpora
         corpora = Corpus.objects.all()
         for corpus in corpora:
             corpora_classified.insert(0, (corpus.news_item.title, corpus.get_classification()))
