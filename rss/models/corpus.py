@@ -6,6 +6,8 @@ from .newsitem import NewsItem
 class Corpus(models.Model):
     class Meta:
         db_table = 'corpus'
+        verbose_name = 'corpus'
+        verbose_name_plural = 'corpora'
 
     news_item = models.ForeignKey(NewsItem, null=False, on_delete=models.DO_NOTHING)
     positive = models.BooleanField(default=False, null=False)
