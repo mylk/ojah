@@ -14,7 +14,7 @@ class RssFeed(Feed):
 
     def items(self):
         return NewsItem.find_positive(
-            settings.RSS_FEED_SENTIMENT_POLARITY_THRESHOLD,
+            settings.SENTIMENT_POLARITY_THRESHOLD,
             settings.RSS_FEED_NEWS_ITEMS_COUNT
         )
 

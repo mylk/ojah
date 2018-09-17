@@ -3,7 +3,7 @@ FROM python:3
 ADD . /ojah
 WORKDIR /ojah
 
-COPY crontab /var/spool/cron/crontabs/root
+COPY build/app/crontab /var/spool/cron/crontabs/root
 
 RUN apt-get update && \
     apt-get -y install cron && \
@@ -12,4 +12,4 @@ RUN apt-get update && \
     make deps && \
     make init
 
-CMD ["/ojah/start.sh"]
+CMD ["/ojah/build/app/start.sh"]

@@ -1,5 +1,6 @@
 deps:
 	pip install -r requirements.txt
+	python -m textblob.download_corpora
 
 deps_dev:
 	pip install -r requirements_dev.txt
