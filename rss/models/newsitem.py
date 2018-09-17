@@ -7,7 +7,7 @@ class NewsItem(models.Model):
     class Meta:
         db_table = 'news_item'
 
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=300)
     description = models.TextField()
     source = models.ForeignKey(Source, null=True, on_delete=models.DO_NOTHING)
     url = models.URLField(null=True)
