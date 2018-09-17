@@ -4,9 +4,9 @@ from rss.models.newsitem import NewsItem
 from rss.models.corpus import Corpus
 import feedparser
 from textblob.classifiers import NaiveBayesClassifier
-from nltk.corpus import twitter_samples
 from random import shuffle
 import sys
+
 
 class Command(BaseCommand):
     help = 'Crawl RSS feeds and perform sentiment analysis on news items'
