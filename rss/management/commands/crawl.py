@@ -1,12 +1,11 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.core import serializers
 from rss.models.source import Source
 from rss.models.newsitem import NewsItem
+import datetime
 import feedparser
-from textblob.classifiers import NaiveBayesClassifier
-from random import shuffle
 import pika
-import json
 
 
 class Command(BaseCommand):
@@ -52,10 +51,10 @@ class Command(BaseCommand):
             news_item.url = entry['link']
             news_item.source = source
             news_item.score = None
-            news_item.added_at = entry['updated']
+            news_item.added_at = datetime.datetime.strptime(entry['updated'], '%Y-%m-%dT%H:%M:%S%z')
             news_item.save()
 
-            body = json.dumps({'id': news_item.id, 'title': news_item.title})
+            body = serializers.serialize('json', [news_item])
             channel.basic_publish(
                 exchange='',
                 routing_key=settings.QUEUE_NAME_CLASSIFY,

@@ -1,11 +1,11 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.core import serializers
 from rss.models.newsitem import NewsItem
 from rss.models.corpus import Corpus
 from textblob.classifiers import NaiveBayesClassifier
 from random import shuffle
 import pika
-import json
 
 
 class Command(BaseCommand):
@@ -39,18 +39,19 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR('Classifier was not ready when started to classify.'))
             return
 
-        queue_item = json.loads(body)
         try:
-            self.stdout.write('Classifying #%s...' % queue_item['id'])
-            classification = self.classifier.classify(queue_item['title'])
+            queue_items = serializers.deserialize('json', body)
+            queue_item = next(queue_items).object
 
-            news_item = NewsItem.objects.get(pk=queue_item['id'])
-            news_item.score = 1 if classification == 'pos' else 0
-            news_item.save()
+            self.stdout.write('Classifying #%s...' % queue_item.id)
+            classification = self.classifier.classify(queue_item.title)
+
+            queue_item.score = 1 if classification == 'pos' else 0
+            queue_item.save()
 
             channel.basic_ack(delivery_tag=method.delivery_tag)
         except RuntimeError:
-            self.stdout.write(self.style.ERROR('Could not classify #%s.' % queue_item['id']))
+            self.stdout.write(self.style.ERROR('Could not classify #%s.' % queue_item.id))
             return
 
-        self.stdout.write(self.style.SUCCESS('Successfully classified #{} "{}" as "{}"!'.format(queue_item['id'], queue_item['title'], classification)))
+        self.stdout.write(self.style.SUCCESS('Successfully classified #{} "{}" as "{}"!'.format(queue_item.id, queue_item.title, classification)))
