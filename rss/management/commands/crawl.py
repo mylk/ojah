@@ -6,10 +6,12 @@ from rss.models.newsitem import NewsItem
 import datetime
 import feedparser
 import pika
+import logging
 
 
 class Command(BaseCommand):
     help = 'Crawl RSS feeds'
+    logger = logging.getLogger('rss')
 
     def add_arguments(self, parser):
         parser.add_argument('name', nargs='?', type=str)
@@ -20,7 +22,7 @@ class Command(BaseCommand):
         if name:
             sources = Source.objects.filter(name=name)
             if not sources:
-                self.stdout.write(self.style.ERROR('Could not find source \'%s\'.' % name))
+                self.logger.error('Could not find source \'%s\'.' % name)
         else:
             sources = Source.objects.all()
 
@@ -32,11 +34,11 @@ class Command(BaseCommand):
             self.crawl(source, channel)
 
     def crawl(self, source, channel):
-        self.stdout.write('Crawling \'%s\'...' % source.name)
+        self.logger.info('Crawling \'%s\'...' % source.name)
         try:
             feed = feedparser.parse(source.url)
         except RuntimeError:
-            self.stdout.write(self.style.ERROR('Could not crawl \'%s\'.' % source.name))
+            self.logger.error('Could not crawl \'%s\'.' % source.name)
             return
 
         for entry in feed['entries']:
@@ -64,4 +66,4 @@ class Command(BaseCommand):
 
         source.crawled()
 
-        self.stdout.write(self.style.SUCCESS('Successfully crawled \'%s\'!' % source.name))
+        self.logger.info('Successfully crawled \'%s\'!' % source.name)

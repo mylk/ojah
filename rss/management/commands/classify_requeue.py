@@ -3,10 +3,12 @@ from django.conf import settings
 from django.core import serializers
 from rss.models.newsitem import NewsItem
 import pika
+import logging
 
 
 class Command(BaseCommand):
     help = 'Re-queue for classification the news items missing score'
+    logger = logging.getLogger('rss')
 
     def handle(self, *args, **options):
         news_items = NewsItem.objects.filter(score=None)
@@ -16,10 +18,10 @@ class Command(BaseCommand):
         channel.queue_declare(queue=settings.QUEUE_NAME_CLASSIFY, durable=True)
 
         if not news_items:
-            self.stdout.write('All news items are already classified!')
+            self.logger.info('All news items are already classified!')
             return
 
-        self.stdout.write('Found %s news items that need to be classified.' % len(news_items))
+        self.logger.info('Found %s news items that need to be classified.' % len(news_items))
 
         for news_item in news_items:
             body = serializers.serialize('json', [news_item])
@@ -30,4 +32,4 @@ class Command(BaseCommand):
                 properties=pika.BasicProperties(delivery_mode=2)
             )
 
-            self.stdout.write(self.style.SUCCESS('Successfully re-queued #{} "{}"!'.format(news_item.id, news_item.title)))
+            self.logger.info(self.style.SUCCESS('Successfully re-queued #{} "{}"!'.format(news_item.id, news_item.title)))

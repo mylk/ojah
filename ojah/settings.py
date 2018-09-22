@@ -115,8 +115,6 @@ STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 # Logging
 
-LOG_LEVEL = 'WARN'
-LOG_FILENAME = 'ojah.log'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -130,22 +128,33 @@ LOGGING = {
         }
     },
     'handlers': {
-        'file': {
-            'level': LOG_LEVEL,
+        'console':{
+            'level':'DEBUG',
+            'class':'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        'file_django': {
+            'level': 'WARN',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/', LOG_FILENAME),
+            'filename': os.path.join(BASE_DIR, 'logs/django.log'),
+            'formatter': 'verbose'
+        },
+        'file_app': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/app.log'),
             'formatter': 'verbose'
         }
     },
     'loggers': {
         'django': {
-            'handlers': ['file'],
+            'handlers': ['file_django'],
             'propagate': True,
-            'level': LOG_LEVEL
+            'level': 'WARN'
         },
         'rss': {
-            'handlers': ['file'],
-            'level': LOG_LEVEL
+            'handlers': ['file_app', 'console'],
+            'level': 'INFO'
         }
     }
 }
@@ -158,3 +167,4 @@ RSS_FEED_NEWS_ITEMS_COUNT = 250
 SENTIMENT_POLARITY_THRESHOLD = 0.5
 QUEUE_HOSTNAME = 'rabbitmq'
 QUEUE_NAME_CLASSIFY = 'classify'
+QUEUE_NAME_TRAIN = 'train'
