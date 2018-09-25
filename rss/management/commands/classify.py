@@ -43,7 +43,8 @@ class Command(BaseCommand):
 
     def get_consumer(self, queue, callback):
         try:
-            connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.QUEUE_HOSTNAME))
+            params = pika.ConnectionParameters(host=settings.QUEUE_HOSTNAME, heartbeat_interval=600, blocked_connection_timeout=300)
+            connection = pika.BlockingConnection(params)
             channel = connection.channel()
             channel.queue_declare(queue=queue, durable=True)
             channel.basic_qos(prefetch_count=1)
