@@ -165,6 +165,7 @@ RSS_FEED_TITLE = 'Ojah, the positive news aggregator'
 RSS_FEED_DESCRIPTION = 'Most positive news of the internet in one feed!'
 RSS_FEED_NEWS_ITEMS_COUNT = 250
 SENTIMENT_POLARITY_THRESHOLD = 0.5
+AUTO_PUBLISH = False
 QUEUE_HOSTNAME = 'rabbitmq'
 QUEUE_NAME_CLASSIFY = 'classify'
 QUEUE_NAME_TRAIN = 'train'

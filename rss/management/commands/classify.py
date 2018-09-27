@@ -73,6 +73,7 @@ class Command(BaseCommand):
                 classification = self.classifier.classify(queue_item.title)
 
                 queue_item.score = 1 if classification == 'pos' else 0
+                queue_item.published = True if settings.AUTO_PUBLISH else False
                 queue_item.save()
 
                 channel.basic_ack(delivery_tag=method.delivery_tag)
