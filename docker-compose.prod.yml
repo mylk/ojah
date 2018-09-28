@@ -1,0 +1,8 @@
+version: "2"
+services:
+    app:
+        restart: always
+    worker_classify:
+        restart: always
+    rabbitmq:
+        restart: always

@@ -49,8 +49,8 @@ make init
 
 The application is now served by your localhost.
 
-- Add the RSS feeds you want ```Ojah!``` to crawl using the administration panel at ```http://127.0.0.1:8000/admin```.
-The default username is ```ojah``` and the password is ```ojah``` too.
+- Add the RSS feeds you want `Ojah!` to crawl using the administration panel at `http://127.0.0.1:8000/admin`.
+The default username is `ojah` and the password is `ojah`` too.
 
 - Trigger the crawling and scoring the news:
 
@@ -70,13 +70,13 @@ Run in container
 Build the image:
 
 ```
-docker build -t mylkohrly/ojah .
+docker-compose build
 ```
 
 Start a container using the above image:
 
 ```
-docker run -d -p 8000:8000 mylkohrly/ojah
+docker-compose up -d
 ```
 
 You can still visit the application pointing to your host:
