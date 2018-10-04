@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.conf import settings
+from rangefilter.filter import DateRangeFilter
 from .models.source import Source
 from .models.newsitem import NewsItem
 from .models.corpus import Corpus
@@ -77,7 +78,7 @@ class SourceAdmin(admin.ModelAdmin):
 
 class NewsItemAdmin(admin.ModelAdmin):
     list_display = ('title', 'source', 'score', 'published', 'added_at')
-    list_filter = ['score', 'published', 'source']
+    list_filter = ('score', 'published', 'source', ('added_at', DateRangeFilter))
     search_fields = ['title']
     ordering = ['-added_at']
     actions = [
