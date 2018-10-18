@@ -1,8 +1,10 @@
 from django.contrib import admin
 from django.conf import settings
+from django.db.models import Count
 from rangefilter.filter import DateRangeFilter
 from .models.source import Source
 from .models.newsitem import NewsItem
+from .models.newsitem_metric import NewsItemMetric
 from .models.corpus import Corpus
 import pika
 
@@ -100,6 +102,42 @@ class CorpusAdmin(admin.ModelAdmin):
     ordering = ['-added_at']
 
 
+class NewsItemMetricAdmin(admin.ModelAdmin):
+    change_list_template = 'admin/newsitem_metric_list.html'
+    date_hierarchy = 'added_at'
+
+    def changelist_view(self, request, extra_context=None):
+        response = super().changelist_view(
+            request,
+            extra_context=extra_context,
+        )
+
+        try:
+            qs = response.context_data['cl'].queryset
+        except (AttributeError, KeyError):
+            return response
+
+        metrics = {
+            'total': Count('id')
+        }
+
+        response.context_data['classification_metrics'] = list(
+            qs
+                .values('score')
+                .annotate(**metrics)
+                .order_by('-total')
+        )
+
+        response.context_data['classification_metrics_total'] = dict(
+            qs.aggregate(**metrics)
+        )
+
+        response.context_data['sentiment_polarity_threshold'] = settings.SENTIMENT_POLARITY_THRESHOLD
+
+        return response
+
+
 admin.site.register(Source, SourceAdmin)
 admin.site.register(NewsItem, NewsItemAdmin)
+admin.site.register(NewsItemMetric, NewsItemMetricAdmin)
 admin.site.register(Corpus, CorpusAdmin)
