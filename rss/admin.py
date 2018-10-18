@@ -6,6 +6,7 @@ from .models.source import Source
 from .models.newsitem import NewsItem
 from .models.newsitem_metric import NewsItemMetric
 from .models.corpus import Corpus
+from .models.corpus_metric import CorpusMetric
 import pika
 
 
@@ -137,7 +138,41 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
         return response
 
 
+class CorpusMetricAdmin(admin.ModelAdmin):
+    change_list_template = 'admin/corpus_metric_list.html'
+    date_hierarchy = 'added_at'
+
+    def changelist_view(self, request, extra_context=None):
+        response = super().changelist_view(
+            request,
+            extra_context=extra_context,
+        )
+
+        try:
+            qs = response.context_data['cl'].queryset
+        except (AttributeError, KeyError):
+            return response
+
+        metrics = {
+            'total': Count('id')
+        }
+
+        response.context_data['corpus_metrics'] = list(
+            qs
+                .values('positive')
+                .annotate(**metrics)
+                .order_by('-total')
+        )
+
+        response.context_data['corpus_metrics_total'] = dict(
+            qs.aggregate(**metrics)
+        )
+
+        return response
+
+
 admin.site.register(Source, SourceAdmin)
 admin.site.register(NewsItem, NewsItemAdmin)
 admin.site.register(NewsItemMetric, NewsItemMetricAdmin)
 admin.site.register(Corpus, CorpusAdmin)
+admin.site.register(CorpusMetric, CorpusMetricAdmin)
