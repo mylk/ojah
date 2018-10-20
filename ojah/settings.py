@@ -25,6 +25,7 @@ SECRET_KEY = 'wer%z@ii(*&)*1f9$bft^1d=*9aocg&l30lhpp7oj52)0(hwez'
 DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'ojah.io', 'www.ojah.io']
+INTERNAL_IPS = ['127.0.0.1', '192.168.32.1']
 
 # Application definition
 
@@ -49,6 +50,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+if DEBUG:
+    INSTALLED_APPS.append('debug_toolbar')
+    MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 
 ROOT_URLCONF = 'ojah.urls'
 

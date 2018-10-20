@@ -4,6 +4,8 @@ services:
         build:
             context: ./
             dockerfile: build/app/Dockerfile
+            args:
+                - DEBUG=1
         ports:
             - "8000:8000"
         networks:

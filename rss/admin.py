@@ -136,7 +136,7 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
         response.context_data['classification_initial'] = {
             'positive': news_items_count_positive,
             'negative': news_items_count_negative,
-         }
+        }
 
         # query for corpora
         params_corpus = dict(params)
@@ -153,7 +153,7 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
         response.context_data['classification_supervised'] = {
             'positive': ((news_items_count_positive - corpus_count_negative) + corpus_count_positive),
             'negative': ((news_items_count_negative - corpus_count_positive) + corpus_count_negative),
-         }
+        }
 
         try:
             qs = response.context_data['cl'].queryset

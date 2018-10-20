@@ -1,6 +1,9 @@
 version: "2"
 services:
     app:
+        build:
+            args:
+                - DEBUG=0
         restart: always
     worker_classify:
         restart: always
