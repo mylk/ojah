@@ -113,27 +113,52 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
             extra_context=extra_context,
         )
 
+        # get url query parameters
+        params = dict()
+        for k, v in request.GET.lists():
+            params[k] = v[0]
+
+        # query for the news items as initially scored
+        params_positive = dict(params)
+        params_positive['score__gte'] = settings.SENTIMENT_POLARITY_THRESHOLD
+        news_items_count_positive = NewsItem.objects.filter(**params_positive).count()
+        params_negative = dict(params)
+        params_negative['score__lt'] = settings.SENTIMENT_POLARITY_THRESHOLD
+        news_items_count_negative = NewsItem.objects.filter(**params_negative).count()
+
+        # query for all news items and calculate possible unclassified
+        news_items_count = NewsItem.objects.filter(**params).count()
+        response.context_data['news_items_count'] = news_items_count
+
+        news_items_count_unclassified = (news_items_count - (news_items_count_positive + news_items_count_negative))
+        response.context_data['news_items_unclassified'] = news_items_count_unclassified
+
+        response.context_data['classification_initial'] = {
+            'positive': news_items_count_positive,
+            'negative': news_items_count_negative,
+         }
+
+        # query for corpora
+        params_corpus = dict(params)
+        params_corpus['positive'] = True
+        corpus_count_positive = Corpus.objects.filter(**params_corpus).count()
+        params_corpus['positive'] = False
+        corpus_count_negative = Corpus.objects.filter(**params_corpus).count()
+        response.context_data['corpus_count'] = {
+            'positive': corpus_count_positive,
+            'negative': corpus_count_negative
+        }
+
+        # calculate news items after supervision
+        response.context_data['classification_supervised'] = {
+            'positive': ((news_items_count_positive - corpus_count_negative) + corpus_count_positive),
+            'negative': ((news_items_count_negative - corpus_count_positive) + corpus_count_negative),
+         }
+
         try:
             qs = response.context_data['cl'].queryset
         except (AttributeError, KeyError):
             return response
-
-        metrics = {
-            'total': Count('id')
-        }
-
-        response.context_data['classification_metrics'] = list(
-            qs
-                .values('score')
-                .annotate(**metrics)
-                .order_by('-total')
-        )
-
-        response.context_data['classification_metrics_total'] = dict(
-            qs.aggregate(**metrics)
-        )
-
-        response.context_data['sentiment_polarity_threshold'] = settings.SENTIMENT_POLARITY_THRESHOLD
 
         return response
 

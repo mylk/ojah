@@ -12,35 +12,35 @@
         <thead>
             <tr>
                 <th><div class="text"><a href="#">Class</a></div></th>
-                <th><div class="text"><a href="#">Count</a></div></th>
-                <th><div class="text"><a href="#"><strong>% Of Total</strong></a></div></th>
+                <th><div class="text"><a href="#">Count (initial)</a></div></th>
+                <th><div class="text"><a href="#"><strong>% of total (initial)</strong></a></div></th>
             </tr>
         </thead>
         <tbody>
-            {% for row in classification_metrics %}
-                <tr class="{% cycle 'row1' 'row2' %}">
-                    <td>
-                        {% if row.score < sentiment_polarity_threshold %}
-                            Negative
-                        {% elif row.score > sentiment_polarity_threshold %}
-                            Positive
-                        {% elif row.score == null %}
-                            Unclassified
-                        {% else %}
-                            Other
-                        {% endif %}
-                    </td>
-                    <td>{{ row.total }}</td>
-                    <td>
-                        <strong>
-                            {{ row.total | default:0 | percentof:classification_metrics_total.total }}
-                        </strong>
-                    </td>
-                </tr>
-            {% endfor %}
+            <tr class="row1">
+                <td>Positive</td>
+                <td>{{ classification_supervised.positive }} ({{ classification_initial.positive }})</td>
+                <td>
+                    <strong>{{ classification_supervised.positive | default:0 | percentof:news_items_count }}</strong>
+                    ({{ classification_initial.positive | default:0 | percentof:news_items_count }})
+                </td>
+            </tr>
+            <tr class="row2">
+                <td>Negative</td>
+                <td>{{ classification_supervised.negative }} ({{ classification_initial.negative }})</td>
+                <td>
+                    <strong>{{ classification_supervised.negative | default:0 | percentof:news_items_count }}</strong>
+                    ({{ classification_initial.negative | default:0 | percentof:news_items_count }})
+                </td>
+            </tr>
+            <tr class="row">
+                <td>Unclassified</td>
+                <td>{{ news_items_unclassified }}</td>
+                <td><strong>{{ news_items_unclassified | default:0 | percentof:news_items_count }}</strong></td>
+            </tr>
             <tr style="font-weight: bold; border-top: 2px solid #DDDDDD;">
                 <td>Total</td>
-                <td>{{ classification_metrics_total.total }}</td>
+                <td>{{ news_items_count }}</td>
                 <td>100%</td>
             </tr>
         </tbody>
