@@ -13,6 +13,8 @@ services:
         volumes:
             - ./:/ojah
         depends_on: [rabbitmq]
+        environment:
+           - DEBUG=1
     worker_classify:
         build:
             context: ./

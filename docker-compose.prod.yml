@@ -5,6 +5,8 @@ services:
             args:
                 - DEBUG=0
         restart: always
+        environment:
+           - DEBUG=0
     worker_classify:
         restart: always
     rabbitmq:
