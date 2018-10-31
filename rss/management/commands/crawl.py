@@ -36,6 +36,7 @@ class Command(BaseCommand):
     def crawl(self, source, channel):
         self.logger.info('Crawling \'%s\'...' % source.name)
         try:
+            feedparser.USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"
             feed = feedparser.parse(source.url)
         except RuntimeError:
             self.logger.error('Could not crawl \'%s\'.' % source.name)
