@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.conf import settings
+from django.db import connection
 from rss.models.newsitem import NewsItem
 from rss.models.corpus import Corpus
 
@@ -7,6 +8,14 @@ from rss.models.corpus import Corpus
 class NewsItemMetricAdmin(admin.ModelAdmin):
     change_list_template = 'admin/newsitem_metric_list.html'
     date_hierarchy = 'added_at'
+
+    @staticmethod
+    def dictfetchall(cursor):
+        columns = [col[0] for col in cursor.description]
+        return [
+            dict(zip(columns, row))
+            for row in cursor.fetchall()
+        ]
 
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(
@@ -56,4 +65,43 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
             'negative': ((news_items_count_negative - corpus_count_positive) + corpus_count_negative),
         }
 
+        # calculate accuracy over time
+        with connection.cursor() as cursor:
+            cursor.execute('''
+                SELECT
+                (
+                    100 - (
+                        CASE errors.error
+                        WHEN 0
+                        THEN 100
+                        ELSE errors.error
+                        END
+                    )
+                ) AS accuracy,
+                added_at
+                FROM (
+                    SELECT round(
+                        (
+                            (
+                                PRINTF("%.2f", counts.corpus_count) / PRINTF("%.2f", counts.news_count)
+                            ) * 100
+                        ), 2
+                    ) AS error,
+                    added_at
+                    FROM (
+                        SELECT
+                        COUNT(news_and_corpora.news_item_id) AS news_count,
+                        COUNT(news_and_corpora.corpus_id) AS corpus_count,
+                        added_at
+                        FROM (
+                            SELECT ni.id as news_item_id, c.id as corpus_id, date(ni.added_at) as added_at
+                            FROM news_item AS ni
+                            LEFT JOIN corpus AS c ON c.news_item_id = ni.id
+                        ) AS news_and_corpora
+                        GROUP BY added_at
+                    ) AS counts
+                    GROUP BY added_at
+                ) AS errors;
+            ''')
+            response.context_data['accuracy'] = self.dictfetchall(cursor)
         return response

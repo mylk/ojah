@@ -1,5 +1,53 @@
 {% extends "admin/change_list.html" %}
 
+{% block extrahead %}
+    <style>
+        .bar-chart {
+            display: flex;
+            justify-content: space-around;
+            height: 160px;
+            padding-top: 50px;
+            overflow: hidden;
+            background-color: #f9f9f9;
+        }
+
+        .bar-chart .bar {
+            flex: 100%;
+            align-self: flex-end;
+            margin-right: 2px;
+            position: relative;
+            background-color: #79aec8;
+        }
+
+        .bar-chart .bar:last-child {
+            margin: 0;
+        }
+
+        .bar-chart .bar:hover {
+            background-color: #417690;
+        }
+
+        .bar-chart .bar .bar-tooltip {
+            position: relative;
+            z-index: 999;
+        }
+
+        .bar-chart .bar .bar-tooltip {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-weight: bold;
+            opacity: 0;
+        }
+
+        .bar-chart .bar:hover .bar-tooltip {
+            opacity: 1;
+        }
+    </style>
+{% endblock %}
+
 {% block content_title %}
     <h1>News Item Metrics</h1>
 {% endblock %}
@@ -45,6 +93,23 @@
             </tr>
         </tbody>
     </table>
+
+    <br /><br /><br />
+
+    <h2>Accuracy over time</h2>
+
+    <div class="results">
+        <div class="bar-chart">
+        {% for x in accuracy %}
+            <div class="bar" style="height: {{ x.accuracy }}%">
+                <div class="bar-tooltip">
+                    {{ x.accuracy }}<br>
+                    {{ x.added_at }}
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    </div>
 </div>
 {% endblock %}
 
