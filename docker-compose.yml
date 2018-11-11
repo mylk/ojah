@@ -26,8 +26,6 @@ services:
         depends_on: [rabbitmq]
     rabbitmq:
         image: rabbitmq:3-management
-        ports:
-            - "15672:15672"
         networks:
             - ojah_net
 networks:
