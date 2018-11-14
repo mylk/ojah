@@ -3,6 +3,8 @@ from django.conf import settings
 from django.db import connection
 from rss.models.newsitem import NewsItem
 from rss.models.corpus import Corpus
+from datetime import datetime
+import calendar
 
 
 class NewsItemMetricAdmin(admin.ModelAdmin):
@@ -16,6 +18,36 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
             dict(zip(columns, row))
             for row in cursor.fetchall()
         ]
+
+    @staticmethod
+    def get_date_range(params):
+        # set the defaults, if no range elements are selected
+        from_year = 2018
+        from_month = 1
+        from_day = 1
+        to_year = datetime.now().year
+        to_month = datetime.now().month
+        to_day = None
+
+        if 'added_at__year' in params:
+            from_year = params['added_at__year']
+            to_year = params['added_at__year']
+
+        if 'added_at__month' in params:
+            from_month = params['added_at__month']
+            to_month = params['added_at__month']
+
+        if 'added_at__day' in params:
+            from_day = params['added_at__day']
+            to_day = params['added_at__day']
+        else:
+            # get the last day of the selected month
+            to_day = calendar.monthrange(int(to_year), int(to_month))[-1]
+
+        return {
+            'date_from': '{}-{:02d}-{:02d} 00:00:00'.format(from_year, int(from_month), int(from_day)),
+            'date_to': '{}-{:02d}-{:02d} 23:59:59'.format(to_year, int(to_month), int(to_day))
+        }
 
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(
@@ -66,6 +98,7 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
         }
 
         # calculate accuracy over time
+        date_range = self.get_date_range(params)
         with connection.cursor() as cursor:
             cursor.execute('''
                 SELECT
@@ -97,11 +130,12 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
                             SELECT ni.id as news_item_id, c.id as corpus_id, date(ni.added_at) as added_at
                             FROM news_item AS ni
                             LEFT JOIN corpus AS c ON c.news_item_id = ni.id
+                            WHERE ni.added_at BETWEEN %s AND %s
                         ) AS news_and_corpora
                         GROUP BY added_at
                     ) AS counts
                     GROUP BY added_at
                 ) AS errors;
-            ''')
+            ''', (date_range['date_from'], date_range['date_to']))
             response.context_data['accuracy'] = self.dictfetchall(cursor)
         return response
