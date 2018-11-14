@@ -12,7 +12,7 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
     date_hierarchy = 'added_at'
 
     @staticmethod
-    def dictfetchall(cursor):
+    def dict_fetch_all(cursor):
         columns = [col[0] for col in cursor.description]
         return [
             dict(zip(columns, row))
@@ -105,20 +105,16 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
                 (
                     100 - (
                         CASE errors.error
-                        WHEN 0
+                        WHEN CAST(0 AS FLOAT)
                         THEN 100
-                        ELSE errors.error
+                        ELSE PRINTF("%.2f", errors.error)
                         END
                     )
                 ) AS accuracy,
                 added_at
                 FROM (
-                    SELECT round(
-                        (
-                            (
-                                PRINTF("%.2f", counts.corpus_count) / PRINTF("%.2f", counts.news_count)
-                            ) * 100
-                        ), 2
+                    SELECT (
+                        (CAST(counts.corpus_count AS FLOAT) / CAST(counts.news_count AS FLOAT)) * 100
                     ) AS error,
                     added_at
                     FROM (
@@ -127,7 +123,7 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
                         COUNT(news_and_corpora.corpus_id) AS corpus_count,
                         added_at
                         FROM (
-                            SELECT ni.id as news_item_id, c.id as corpus_id, date(ni.added_at) as added_at
+                            SELECT ni.id AS news_item_id, c.id AS corpus_id, DATE(ni.added_at) AS added_at
                             FROM news_item AS ni
                             LEFT JOIN corpus AS c ON c.news_item_id = ni.id
                             WHERE ni.added_at BETWEEN %s AND %s
@@ -137,5 +133,5 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
                     GROUP BY added_at
                 ) AS errors;
             ''', (date_range['date_from'], date_range['date_to']))
-            response.context_data['accuracy'] = self.dictfetchall(cursor)
+            response.context_data['accuracy'] = self.dict_fetch_all(cursor)
         return response
