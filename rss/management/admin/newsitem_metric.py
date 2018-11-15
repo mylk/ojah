@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.conf import settings
-from django.db import connection
 from rss.models.newsitem import NewsItem
+from rss.models.newsitem_metric import NewsItemMetric
 from rss.models.corpus import Corpus
 from datetime import datetime
 import calendar
@@ -12,12 +12,11 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
     date_hierarchy = 'added_at'
 
     @staticmethod
-    def dict_fetch_all(cursor):
-        columns = [col[0] for col in cursor.description]
-        return [
-            dict(zip(columns, row))
-            for row in cursor.fetchall()
-        ]
+    def get_request_params(request):
+        params = dict()
+        for k, v in request.GET.lists():
+            params[k] = v[0]
+        return params
 
     @staticmethod
     def get_date_range(params):
@@ -56,9 +55,7 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
         )
 
         # get url query parameters
-        params = dict()
-        for k, v in request.GET.lists():
-            params[k] = v[0]
+        params = self.get_request_params(request)
 
         # query for the news items as initially scored
         params_positive = dict(params)
@@ -99,39 +96,6 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
 
         # calculate accuracy over time
         date_range = self.get_date_range(params)
-        with connection.cursor() as cursor:
-            cursor.execute('''
-                SELECT
-                (
-                    100 - (
-                        CASE errors.error
-                        WHEN CAST(0 AS FLOAT)
-                        THEN 100
-                        ELSE PRINTF("%.2f", errors.error)
-                        END
-                    )
-                ) AS accuracy,
-                added_at
-                FROM (
-                    SELECT (
-                        (CAST(counts.corpus_count AS FLOAT) / CAST(counts.news_count AS FLOAT)) * 100
-                    ) AS error,
-                    added_at
-                    FROM (
-                        SELECT
-                        COUNT(news_and_corpora.news_item_id) AS news_count,
-                        COUNT(news_and_corpora.corpus_id) AS corpus_count,
-                        added_at
-                        FROM (
-                            SELECT ni.id AS news_item_id, c.id AS corpus_id, DATE(ni.added_at) AS added_at
-                            FROM news_item AS ni
-                            LEFT JOIN corpus AS c ON c.news_item_id = ni.id
-                            WHERE ni.added_at BETWEEN %s AND %s
-                        ) AS news_and_corpora
-                        GROUP BY added_at
-                    ) AS counts
-                    GROUP BY added_at
-                ) AS errors;
-            ''', (date_range['date_from'], date_range['date_to']))
-            response.context_data['accuracy'] = self.dict_fetch_all(cursor)
+        response.context_data['accuracy'] = NewsItemMetric().get_accuracy(date_range)
+
         return response
