@@ -1,6 +1,3 @@
-#!/usr/bin/python3
-# -*- coding: utf8 -*-
-
 from django.test import TestCase
 from django.contrib.admin.options import ModelAdmin
 from django.contrib.admin.sites import AdminSite
@@ -86,7 +83,3 @@ class NewsItemMetricAdminTestCase(TestCase):
         params = self.admin.get_request_params(request)
         self.assertEquals('bar', params['foo'])
         self.assertEquals('foo', params['baz'])
-
-
-if __name__ == '__main__':
-    unittest.main()
