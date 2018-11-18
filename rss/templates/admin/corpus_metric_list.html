@@ -29,7 +29,7 @@
                     <td>{{ row.total }}</td>
                     <td>
                         <strong>
-                            {{ row.total | default:0 | percentof:corpus_metrics_total.total }}
+                            {{ row.total | default:0 | percent_of:corpus_metrics_total.total }}
                         </strong>
                     </td>
                 </tr>

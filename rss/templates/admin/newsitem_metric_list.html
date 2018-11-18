@@ -69,22 +69,22 @@
                 <td>Positive</td>
                 <td>{{ classification_supervised.positive }} ({{ classification_initial.positive }})</td>
                 <td>
-                    <strong>{{ classification_supervised.positive | default:0 | percentof:news_items_count }}</strong>
-                    ({{ classification_initial.positive | default:0 | percentof:news_items_count }})
+                    <strong>{{ classification_supervised.positive | default:0 | percent_of:news_items_count }}</strong>
+                    ({{ classification_initial.positive | default:0 | percent_of:news_items_count }})
                 </td>
             </tr>
             <tr class="row2">
                 <td>Negative</td>
                 <td>{{ classification_supervised.negative }} ({{ classification_initial.negative }})</td>
                 <td>
-                    <strong>{{ classification_supervised.negative | default:0 | percentof:news_items_count }}</strong>
-                    ({{ classification_initial.negative | default:0 | percentof:news_items_count }})
+                    <strong>{{ classification_supervised.negative | default:0 | percent_of:news_items_count }}</strong>
+                    ({{ classification_initial.negative | default:0 | percent_of:news_items_count }})
                 </td>
             </tr>
             <tr class="row">
                 <td>Unclassified</td>
                 <td>{{ news_items_unclassified }}</td>
-                <td><strong>{{ news_items_unclassified | default:0 | percentof:news_items_count }}</strong></td>
+                <td><strong>{{ news_items_unclassified | default:0 | percent_of:news_items_count }}</strong></td>
             </tr>
             <tr style="font-weight: bold; border-top: 2px solid #DDDDDD;">
                 <td>Total</td>

@@ -4,6 +4,7 @@ from .newsitem import NewsItem
 
 
 class Corpus(models.Model):
+
     class Meta:
         db_table = 'corpus'
         verbose_name = 'corpus'
