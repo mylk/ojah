@@ -1,1 +1,1 @@
-from .views.rssfeed import RssFeed
+from rss.views.rssfeed import RssFeed

@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from .newsitem import NewsItem
+from rss.models.newsitem import NewsItem
 
 
 class Corpus(models.Model):

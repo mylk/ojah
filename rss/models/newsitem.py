@@ -1,9 +1,10 @@
 from django.db import models
 from django.utils import timezone
-from .source import Source
+from rss.models.source import Source
 
 
 class NewsItem(models.Model):
+
     class Meta:
         db_table = 'news_item'
 

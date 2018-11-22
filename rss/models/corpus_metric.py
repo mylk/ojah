@@ -1,4 +1,4 @@
-from .corpus import Corpus
+from rss.models.corpus import Corpus
 
 
 class CorpusMetric(Corpus):

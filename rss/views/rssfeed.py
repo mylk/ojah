@@ -2,7 +2,7 @@ from django.urls import reverse_lazy
 from django.conf import settings
 from django.contrib.syndication.views import Feed
 from django.utils.feedgenerator import Rss201rev2Feed
-from ..models.newsitem import NewsItem
+from rss.models.newsitem import NewsItem
 
 
 class RssFeed(Feed):

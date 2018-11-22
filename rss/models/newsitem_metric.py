@@ -1,5 +1,5 @@
 from django.db import connection
-from .newsitem import NewsItem
+from rss.models.newsitem import NewsItem
 
 
 class NewsItemMetric(NewsItem):

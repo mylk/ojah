@@ -3,6 +3,7 @@ from django.utils import timezone
 
 
 class Source(models.Model):
+
     class Meta:
         db_table = 'source'
 
