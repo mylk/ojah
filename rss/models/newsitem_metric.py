@@ -10,7 +10,7 @@ class NewsItemMetric(NewsItem):
         verbose_name_plural = 'news item metrics'
 
     @staticmethod
-    def dict_fetch_all(cursor):
+    def to_dict(cursor):
         columns = [col[0] for col in cursor.description]
         return [
             dict(zip(columns, row))
@@ -46,4 +46,4 @@ class NewsItemMetric(NewsItem):
                     GROUP BY added_at
                 ) AS errors;
             ''', (date_range['date_from'], date_range['date_to']))
-            return self.dict_fetch_all(cursor)
+            return self.to_dict(cursor)
