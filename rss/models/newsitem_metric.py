@@ -22,13 +22,7 @@ class NewsItemMetric(NewsItem):
             cursor.execute('''
                 SELECT
                 (
-                    100 - (
-                        CASE errors.error
-                        WHEN CAST(0 AS FLOAT)
-                        THEN 100
-                        ELSE PRINTF("%.2f", errors.error)
-                        END
-                    )
+                    100 - PRINTF("%.2f", errors.error)
                 ) AS accuracy,
                 added_at
                 FROM (
