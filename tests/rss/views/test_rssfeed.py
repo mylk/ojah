@@ -14,6 +14,26 @@ class RssFeedTestCase(TestCase):
         self.news_item = NewsItem()
         self.rss_feed = RssFeed()
 
+    def test_items_returns_empty_list_when_newsitem_does_not_exist(self):
+        items = self.rss_feed.items()
+        self.assertEquals([], list(items))
+
+    def test_items_returns_newsitems_when_positive_newsitem_exists(self):
+        self.news_item.score = 1
+        self.news_item.published = True
+        self.news_item.save()
+
+        items = self.rss_feed.items()
+        self.assertEquals(1, len(list(items)))
+
+    def test_items_returns_empty_list_when_no_positive_newsitem_exists(self):
+        self.news_item.score = 0
+        self.news_item.published = False
+        self.news_item.save()
+
+        items = self.rss_feed.items()
+        self.assertEquals([], list(items))
+
     def test_item_title_returns_newsitem_title_when_set(self):
         self.news_item.title = 'foo_title'
         self.assertEquals('foo_title', self.rss_feed.item_title(self.news_item))

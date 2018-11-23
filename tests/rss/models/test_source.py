@@ -9,6 +9,12 @@ class SourceTestCase(TestCase):
     def setUp(self):
         self.source = Source()
 
+    def test_crawled_sets_last_crawl_datetime(self):
+        self.assertEquals(None, self.source.last_crawl)
+
+        self.source.crawled()
+        self.assertNotEquals(None, self.source.last_crawl)
+
     def test_str_returns_name_when_name_is_set(self):
         self.source.name = 'foo'
         self.assertEquals('foo', str(self.source))
