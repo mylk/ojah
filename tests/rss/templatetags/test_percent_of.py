@@ -1,8 +1,8 @@
-from django.test import TestCase
 from rss.templatetags.percent_of import percent_of
+import unittest
 
 
-class PercentOfTestCase(TestCase):
+class PercentOfTestCase(unittest.TestCase):
 
     def test_percent_of_returns_percentage_when_not_divide_by_zero(self):
         self.assertEquals('5.0%', percent_of(10, 200))
