@@ -1,5 +1,8 @@
-deps:
-	pip install -r requirements.txt
+deps_app:
+	pip install -r requirements_app.txt
+
+deps_worker_classify:
+	pip install -r requirements_worker_classify.txt
 	python -m textblob.download_corpora
 
 deps_dev:

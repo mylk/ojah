@@ -16,7 +16,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
     groupadd -g ${HOST_GROUP_ID} ${HOST_USER_NAME} && \
     useradd -m -u ${HOST_USER_ID} -g ${HOST_GROUP_ID} -s /bin/bash ${HOST_USER_NAME} && \
-    make deps && \
+    make deps_app && \
     if [ "${DEBUG}" = "1" ]; \
         then make deps_dev; \
     fi && \

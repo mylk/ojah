@@ -9,7 +9,7 @@ WORKDIR /ojah
 
 RUN groupadd -g ${HOST_GROUP_ID} ${HOST_USER_NAME} && \
     useradd -m -u ${HOST_USER_ID} -g ${HOST_GROUP_ID} -s /bin/bash ${HOST_USER_NAME} && \
-    make deps && \
+    make deps_worker_classify && \
     make init
 
 USER ${HOST_USER_NAME}
