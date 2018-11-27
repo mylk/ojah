@@ -8,7 +8,9 @@ import logging
 
 class Command(BaseCommand):
     help = 'Re-queue for classification the news items missing score'
-    logger = logging.getLogger('rss')
+
+    def __init__(self):
+        self.logger = logging.getLogger('rss')
 
     def handle(self, *args, **options):
         news_items = NewsItem.objects.filter(score=None)
@@ -31,4 +33,4 @@ class Command(BaseCommand):
                 properties=pika.BasicProperties(delivery_mode=2)
             )
 
-            self.logger.info(self.style.SUCCESS('Successfully re-queued #{} "{}"!'.format(news_item.id, news_item.title)))
+            self.logger.info('Successfully re-queued #{} "{}"!'.format(news_item.id, news_item.title))

@@ -13,8 +13,10 @@ import time
 
 class Command(BaseCommand):
     help = 'Perform sentiment analysis on news items'
-    logger = logging.getLogger('rss')
     classifier = None
+
+    def __init__(self):
+        self.logger = logging.getLogger('rss')
 
     def handle(self, *args, **options):
         self.logger.info('Training classifier...')
