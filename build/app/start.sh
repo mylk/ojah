@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
-/etc/init.d/cron start
+crond start &
 ./manage.py runserver 0.0.0.0:8000
