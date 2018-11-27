@@ -19,4 +19,7 @@ clean:
 	find . -name __pycache__ -type d -delete
 
 test: clean
-	docker-compose run --rm app ./manage.py test
+	docker-compose run --rm app ./manage.py test tests.rss.models
+	docker-compose run --rm app ./manage.py test tests.rss.templatetags
+	docker-compose run --rm app ./manage.py test tests.rss.views
+	docker-compose run --rm worker_classify ./manage.py test tests.rss.management

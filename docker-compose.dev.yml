@@ -4,6 +4,10 @@ services:
         build:
             args:
                 - DEBUG=1
+    worker_classify:
+        build:
+            args:
+                - DEBUG=1
     rabbitmq:
         ports:
             - "15672:15672"
