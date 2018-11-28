@@ -11,14 +11,15 @@ WORKDIR /ojah
 COPY build/app/crontab /var/spool/cron/crontabs/root
 
 RUN apt-get update && \
-    apt-get -y install cron && \
+    apt-get -y install cron sudo && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     groupadd -g ${HOST_GROUP_ID} ${HOST_USER_NAME} && \
-    useradd -m -u ${HOST_USER_ID} -g ${HOST_GROUP_ID} -s /bin/bash ${HOST_USER_NAME} && \
+    useradd -m -u ${HOST_USER_ID} -g ${HOST_GROUP_ID} -G sudo -s /bin/bash ${HOST_USER_NAME} && \
+    echo "${HOST_USER_NAME} ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers && \
     make deps_app && \
-    if [ "${DEBUG}" = "1" ]; \
-        then make deps_dev; \
+    if [ "${DEBUG}" = "1" ]; then \
+        make deps_dev; \
     fi && \
     make init
 

@@ -3,10 +3,12 @@ deps_app:
 
 deps_worker_classify:
 	pip install -r requirements_worker_classify.txt
-	python -m textblob.download_corpora
 
 deps_dev:
 	pip install -r requirements_dev.txt
+
+deps_corpora:
+	python -m textblob.download_corpora
 
 init:
 	./manage.py makemigrations
