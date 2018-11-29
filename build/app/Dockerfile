@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3-alpine
 
 ARG DEBUG
 ARG HOST_USER_NAME
@@ -10,12 +10,11 @@ WORKDIR /ojah
 
 COPY build/app/crontab /var/spool/cron/crontabs/root
 
-RUN apt-get update && \
-    apt-get -y install cron sudo && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    groupadd -g ${HOST_GROUP_ID} ${HOST_USER_NAME} && \
-    useradd -m -u ${HOST_USER_ID} -g ${HOST_GROUP_ID} -G sudo -s /bin/bash ${HOST_USER_NAME} && \
+RUN apk add make sudo && \
+    addgroup -g ${HOST_GROUP_ID} ${HOST_USER_NAME} && \
+    adduser -u ${HOST_USER_ID} -G ${HOST_USER_NAME} -s /bin/sh -D ${HOST_USER_NAME} && \
+    addgroup sudo && \
+    addgroup mylk sudo && \
     echo "${HOST_USER_NAME} ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers && \
     make deps_app && \
     if [ "${DEBUG}" = "1" ]; then \

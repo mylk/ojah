@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
-sudo /etc/init.d/cron start
+sudo crond start &
 ./manage.py runserver 0.0.0.0:8000

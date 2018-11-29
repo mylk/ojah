@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 until curl -sL "http://rabbitmq:15672" -o /dev/null
