@@ -10,7 +10,7 @@ WORKDIR /ojah
 
 COPY build/app/crontab /var/spool/cron/crontabs/root
 
-RUN apk add make sudo && \
+RUN apk add make curl sudo && \
     addgroup -g ${HOST_GROUP_ID} ${HOST_USER_NAME} && \
     adduser -u ${HOST_USER_ID} -G ${HOST_USER_NAME} -s /bin/sh -D ${HOST_USER_NAME} && \
     addgroup sudo && \
