@@ -30,7 +30,8 @@ def news_item_corpus_create_positive(model_admin, request, query_set):
         corpus.positive = True
         corpus.save()
 
-    enqueue_corpus_creation()
+    if len(query_set):
+        enqueue_corpus_creation()
 
 
 news_item_corpus_create_positive.short_description = 'Corpus - Create positive'
@@ -43,7 +44,8 @@ def news_item_corpus_create_negative(model_admin, request, query_set):
         corpus.positive = False
         corpus.save()
 
-    enqueue_corpus_creation()
+    if len(query_set):
+        enqueue_corpus_creation()
 
 
 news_item_corpus_create_negative.short_description = 'Corpus - Create negative'
