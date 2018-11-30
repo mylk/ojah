@@ -170,6 +170,7 @@ LOGGING = {
 RSS_FEED_TITLE = 'Ojah, the positive news aggregator'
 RSS_FEED_DESCRIPTION = 'Most positive news of the internet in one feed!'
 RSS_FEED_NEWS_ITEMS_COUNT = 250
+RSS_CRAWL_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
 SENTIMENT_POLARITY_THRESHOLD = 0.5
 AUTO_PUBLISH = False
 QUEUE_HOSTNAME = 'rabbitmq'
