@@ -23,7 +23,7 @@ def news_item_unpublish(model_admin, request, query_set):
 news_item_unpublish.short_description = 'Unpublish'
 
 
-def news_item_corpus_create_positive(model_admin, request, query_set):
+def corpus_create_positive(model_admin, request, query_set):
     for news_item in query_set:
         corpus = Corpus()
         corpus.news_item = news_item
@@ -34,10 +34,10 @@ def news_item_corpus_create_positive(model_admin, request, query_set):
         enqueue_corpus_creation()
 
 
-news_item_corpus_create_positive.short_description = 'Corpus - Create positive'
+corpus_create_positive.short_description = 'Corpus - Create positive'
 
 
-def news_item_corpus_create_negative(model_admin, request, query_set):
+def corpus_create_negative(model_admin, request, query_set):
     for news_item in query_set:
         corpus = Corpus()
         corpus.news_item = news_item
@@ -48,11 +48,11 @@ def news_item_corpus_create_negative(model_admin, request, query_set):
         enqueue_corpus_creation()
 
 
-news_item_corpus_create_negative.short_description = 'Corpus - Create negative'
+corpus_create_negative.short_description = 'Corpus - Create negative'
 
 
 def news_item_publish_and_corpus_create_positive(model_admin, request, query_set):
-    news_item_corpus_create_positive(model_admin, request, query_set)
+    corpus_create_positive(model_admin, request, query_set)
     news_item_publish(model_admin, request, query_set)
 
 
@@ -79,7 +79,7 @@ class NewsItemAdmin(admin.ModelAdmin):
     actions = [
         news_item_publish,
         news_item_unpublish,
-        news_item_corpus_create_positive,
-        news_item_corpus_create_negative,
+        corpus_create_positive,
+        corpus_create_negative,
         news_item_publish_and_corpus_create_positive
     ]
