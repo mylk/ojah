@@ -105,6 +105,21 @@ class NewsItemTestCase(TestCase):
 
         self.assertEquals([], list(news_items))
 
+    def test_find_positive_returns_empty_list_when_unclassified_newsitems_exist(self):
+        self.news_item.score = None
+        self.news_item.save()
+
+        self.news_item.score = None
+        self.news_item.published = True
+        self.news_item.save()
+
+        news_items = self.news_item.find_positive(
+            settings.SENTIMENT_POLARITY_THRESHOLD,
+            settings.RSS_FEED_NEWS_ITEMS_COUNT
+        )
+
+        self.assertEquals([], list(news_items))
+
     def test_str_returns_title_when_title_is_set(self):
         self.news_item.title = 'foo'
         self.assertEquals('foo', str(self.news_item))

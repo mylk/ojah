@@ -81,6 +81,21 @@ class NewsItemMetricTestCase(TestCase):
         metrics = self.newsitem_metric.get_accuracy(self.date_range)
         self.assertEquals([], metrics)
 
+    def test_get_accuracy_does_not_include_unclassified_newsitems(self):
+        news_item = NewsItem()
+        news_item.score = None
+        news_item.added_at = '2018-11-24 01:00:00+00:00'
+        news_item.save()
+
+        news_item = NewsItem()
+        news_item.score = None
+        news_item.published = True
+        news_item.added_at = '2018-11-24 02:00:00+00:00'
+        news_item.save()
+
+        metrics = self.newsitem_metric.get_accuracy(self.date_range)
+        self.assertEquals([], metrics)
+
     def test_get_accuracy_returns_empty_list_when_no_newsitems_between_range(self):
         news_item = NewsItem()
         news_item.score = 1

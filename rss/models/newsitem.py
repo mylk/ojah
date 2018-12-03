@@ -27,13 +27,13 @@ class NewsItem(models.Model):
             SELECT *
             FROM news_item
             WHERE (
-              score > %s
-              AND id NOT IN (
-                SELECT news_item_id
-                FROM corpus
-                WHERE positive = 0
-              )
-              AND published = 1
+                score > %s
+                AND id NOT IN (
+                    SELECT news_item_id
+                    FROM corpus
+                    WHERE positive = 0
+                )
+                AND published = 1
             ) OR id IN (
                 SELECT news_item_id
                 FROM corpus
