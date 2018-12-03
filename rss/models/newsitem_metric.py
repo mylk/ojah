@@ -20,8 +20,7 @@ class NewsItemMetric(NewsItem):
     def get_accuracy(self, date_range):
         with connection.cursor() as cursor:
             cursor.execute('''
-                SELECT
-                (
+                SELECT (
                     100 - PRINTF("%.2f", errors.error)
                 ) AS accuracy,
                 added_at
@@ -40,6 +39,7 @@ class NewsItemMetric(NewsItem):
                             FROM news_item AS ni
                             LEFT JOIN corpus AS c ON c.news_item_id = ni.id
                             WHERE ni.added_at BETWEEN %s AND %s
+                            AND NOT ni.score IS NULL
                         ) AS news_and_corpora
                         GROUP BY added_at
                     ) AS counts
