@@ -1,20 +1,32 @@
+import calendar
+from datetime import datetime
 from django.test import TestCase
+from django.test.client import RequestFactory
 from django.contrib.admin.options import ModelAdmin
 from django.contrib.admin.sites import AdminSite
+from django.contrib.auth.models import User
 from django.core.handlers.wsgi import WSGIRequest
-from datetime import datetime
-import calendar
 from rss.management.admin.newsitem_metric import NewsItemMetricAdmin
+from rss.models.corpus import Corpus
+from rss.models.newsitem import NewsItem
 from rss.models.newsitem_metric import NewsItemMetric
 
 
 class NewsItemMetricAdminTestCase(TestCase):
 
     admin = None
-    site = AdminSite()
+    factory = RequestFactory()
 
     def setUp(self):
-        self.admin = NewsItemMetricAdmin(NewsItemMetric, self.site)
+        self.admin = NewsItemMetricAdmin(NewsItemMetric, AdminSite())
+
+    def create_superuser(self, username):
+        return User.objects.create_superuser(username=username, email='foo@bar.baz', password='qwerty')
+
+    def mocked_authenticated_request(self, url, user):
+        request = self.factory.get(url)
+        request.user = user
+        return request
 
     def test_get_date_range_returns_default_when_no_parameters_set(self):
         to_year = datetime.now().year
@@ -83,3 +95,224 @@ class NewsItemMetricAdminTestCase(TestCase):
         params = self.admin.get_request_params(request)
         self.assertEquals('bar', params['foo'])
         self.assertEquals('foo', params['baz'])
+
+    def test_changelist_view_returns_zero_metrics_when_no_newsitems_and_no_corpora_exist(self):
+        superuser = self.create_superuser('superuser')
+        request = self.mocked_authenticated_request('/admin/rss/newsitemmetric/', superuser)
+        response = self.admin.changelist_view(request)
+
+        self.assertEquals(0, response.context_data['news_items_count'])
+        self.assertEquals(0, response.context_data['news_items_unclassified'])
+        self.assertEquals(0, response.context_data['classification_initial']['positive'])
+        self.assertEquals(0, response.context_data['classification_initial']['negative'])
+        self.assertEquals(0, response.context_data['classification_supervised']['positive'])
+        self.assertEquals(0, response.context_data['classification_supervised']['negative'])
+        self.assertEquals(0, response.context_data['corpus_count']['positive'])
+        self.assertEquals(0, response.context_data['corpus_count']['negative'])
+        self.assertEquals([], response.context_data['accuracy'])
+
+    def test_changelist_view_returns_metrics_when_unclassified_newsitems_exist_and_no_corpora(self):
+        news_item = NewsItem()
+        news_item.title = 'foo'
+        news_item.score = None
+        news_item.added_at = '2018-12-03 21:00:00+00:00'
+        news_item.save()
+
+        superuser = self.create_superuser('superuser')
+        request = self.mocked_authenticated_request('/admin/rss/newsitemmetric/', superuser)
+        response = self.admin.changelist_view(request)
+
+        self.assertEquals(1, response.context_data['news_items_count'])
+        self.assertEquals(1, response.context_data['news_items_unclassified'])
+        self.assertEquals(0, response.context_data['classification_initial']['positive'])
+        self.assertEquals(0, response.context_data['classification_initial']['negative'])
+        self.assertEquals(0, response.context_data['classification_supervised']['positive'])
+        self.assertEquals(0, response.context_data['classification_supervised']['negative'])
+        self.assertEquals(0, response.context_data['corpus_count']['positive'])
+        self.assertEquals(0, response.context_data['corpus_count']['negative'])
+        self.assertEquals([], response.context_data['accuracy'])
+
+    def test_changelist_view_returns_metrics_when_newsitems_exist_but_no_corpora(self):
+        news_item = NewsItem()
+        news_item.title = 'foo'
+        news_item.score = 1
+        news_item.added_at = '2018-12-03 21:00:00+00:00'
+        news_item.save()
+
+        news_item = NewsItem()
+        news_item.title = 'bar'
+        news_item.score = 0
+        news_item.added_at = '2018-12-03 22:00:00+00:00'
+        news_item.save()
+
+        superuser = self.create_superuser('superuser')
+        request = self.mocked_authenticated_request('/admin/rss/newsitemmetric/', superuser)
+        response = self.admin.changelist_view(request)
+
+        self.assertEquals(2, response.context_data['news_items_count'])
+        self.assertEquals(0, response.context_data['news_items_unclassified'])
+        self.assertEquals(1, response.context_data['classification_initial']['positive'])
+        self.assertEquals(1, response.context_data['classification_initial']['negative'])
+        self.assertEquals(1, response.context_data['classification_supervised']['positive'])
+        self.assertEquals(1, response.context_data['classification_supervised']['negative'])
+        self.assertEquals(0, response.context_data['corpus_count']['positive'])
+        self.assertEquals(0, response.context_data['corpus_count']['negative'])
+        self.assertEquals([{'accuracy': 100.0, 'added_at': '2018-12-03'}], response.context_data['accuracy'])
+
+    def test_changelist_view_returns_metrics_when_newsitems_exist_but_no_corpora_and_date_query_does_not_include_newsitem(self):
+        news_item = NewsItem()
+        news_item.title = 'foo'
+        news_item.score = 1
+        news_item.added_at = '2018-12-03 21:00:00+00:00'
+        news_item.save()
+
+        superuser = self.create_superuser('superuser')
+        request = self.mocked_authenticated_request('/admin/rss/newsitemmetric/?added_at__month=11&added_at__year=2018', superuser)
+        response = self.admin.changelist_view(request)
+
+        self.assertEquals(0, response.context_data['news_items_count'])
+        self.assertEquals(0, response.context_data['news_items_unclassified'])
+        self.assertEquals(0, response.context_data['classification_initial']['positive'])
+        self.assertEquals(0, response.context_data['classification_initial']['negative'])
+        self.assertEquals(0, response.context_data['classification_supervised']['positive'])
+        self.assertEquals(0, response.context_data['classification_supervised']['negative'])
+        self.assertEquals(0, response.context_data['corpus_count']['positive'])
+        self.assertEquals(0, response.context_data['corpus_count']['negative'])
+        self.assertEquals([], response.context_data['accuracy'])
+
+    def test_changelist_view_returns_metrics_when_newsitems_exist_but_no_corpora_and_date_query_includes_newsitem(self):
+        news_item = NewsItem()
+        news_item.title = 'foo'
+        news_item.score = 1
+        news_item.added_at = '2018-12-03 21:00:00+00:00'
+        news_item.save()
+
+        superuser = self.create_superuser('superuser')
+        request = self.mocked_authenticated_request('/admin/rss/newsitemmetric/?added_at__month=12&added_at__year=2018', superuser)
+        response = self.admin.changelist_view(request)
+
+        self.assertEquals(1, response.context_data['news_items_count'])
+        self.assertEquals(0, response.context_data['news_items_unclassified'])
+        self.assertEquals(1, response.context_data['classification_initial']['positive'])
+        self.assertEquals(0, response.context_data['classification_initial']['negative'])
+        self.assertEquals(1, response.context_data['classification_supervised']['positive'])
+        self.assertEquals(0, response.context_data['classification_supervised']['negative'])
+        self.assertEquals(0, response.context_data['corpus_count']['positive'])
+        self.assertEquals(0, response.context_data['corpus_count']['negative'])
+        self.assertEquals([{'accuracy': 100.0, 'added_at': '2018-12-03'}], response.context_data['accuracy'])
+
+    def test_changelist_view_returns_metrics_when_negative_newsitem_and_positive_corpus_exist(self):
+        news_item = NewsItem()
+        news_item.title = 'foo'
+        news_item.score = 0
+        news_item.added_at = '2018-12-03 21:00:00+00:00'
+        news_item.save()
+
+        corpus = Corpus()
+        corpus.positive = True
+        corpus.news_item = news_item
+        corpus.save()
+
+        superuser = self.create_superuser('superuser')
+        request = self.mocked_authenticated_request('/admin/rss/newsitemmetric/', superuser)
+        response = self.admin.changelist_view(request)
+
+        self.assertEquals(1, response.context_data['news_items_count'])
+        self.assertEquals(0, response.context_data['news_items_unclassified'])
+        self.assertEquals(0, response.context_data['classification_initial']['positive'])
+        self.assertEquals(1, response.context_data['classification_initial']['negative'])
+        self.assertEquals(1, response.context_data['classification_supervised']['positive'])
+        self.assertEquals(0, response.context_data['classification_supervised']['negative'])
+        self.assertEquals(1, response.context_data['corpus_count']['positive'])
+        self.assertEquals(0, response.context_data['corpus_count']['negative'])
+        self.assertEquals([{'accuracy': 0, 'added_at': '2018-12-03'}], response.context_data['accuracy'])
+
+    def test_changelist_view_returns_metrics_when_positive_newsitem_and_negative_corpus_exist(self):
+        news_item = NewsItem()
+        news_item.title = 'foo'
+        news_item.score = 1
+        news_item.added_at = '2018-12-03 21:00:00+00:00'
+        news_item.save()
+
+        corpus = Corpus()
+        corpus.positive = False
+        corpus.news_item = news_item
+        corpus.save()
+
+        superuser = self.create_superuser('superuser')
+        request = self.mocked_authenticated_request('/admin/rss/newsitemmetric/', superuser)
+        response = self.admin.changelist_view(request)
+
+        self.assertEquals(1, response.context_data['news_items_count'])
+        self.assertEquals(0, response.context_data['news_items_unclassified'])
+        self.assertEquals(1, response.context_data['classification_initial']['positive'])
+        self.assertEquals(0, response.context_data['classification_initial']['negative'])
+        self.assertEquals(0, response.context_data['classification_supervised']['positive'])
+        self.assertEquals(1, response.context_data['classification_supervised']['negative'])
+        self.assertEquals(0, response.context_data['corpus_count']['positive'])
+        self.assertEquals(1, response.context_data['corpus_count']['negative'])
+        self.assertEquals([{'accuracy': 0, 'added_at': '2018-12-03'}], response.context_data['accuracy'])
+
+    def test_changelist_view_returns_metrics_when_accurate_and_inaccurate_newsitems_exist_and_finally_all_positive(self):
+        news_item = NewsItem()
+        news_item.title = 'foo'
+        news_item.score = 0
+        news_item.added_at = '2018-12-03 21:00:00+00:00'
+        news_item.save()
+
+        corpus = Corpus()
+        corpus.positive = True
+        corpus.news_item = news_item
+        corpus.save()
+
+        news_item = NewsItem()
+        news_item.title = 'bar'
+        news_item.score = 1
+        news_item.added_at = '2018-12-03 22:00:00+00:00'
+        news_item.save()
+
+        superuser = self.create_superuser('superuser')
+        request = self.mocked_authenticated_request('/admin/rss/newsitemmetric/', superuser)
+        response = self.admin.changelist_view(request)
+
+        self.assertEquals(2, response.context_data['news_items_count'])
+        self.assertEquals(0, response.context_data['news_items_unclassified'])
+        self.assertEquals(1, response.context_data['classification_initial']['positive'])
+        self.assertEquals(1, response.context_data['classification_initial']['negative'])
+        self.assertEquals(2, response.context_data['classification_supervised']['positive'])
+        self.assertEquals(0, response.context_data['classification_supervised']['negative'])
+        self.assertEquals(1, response.context_data['corpus_count']['positive'])
+        self.assertEquals(0, response.context_data['corpus_count']['negative'])
+        self.assertEquals([{'accuracy': 50, 'added_at': '2018-12-03'}], response.context_data['accuracy'])
+
+    def test_changelist_view_returns_metrics_when_accurate_and_inaccurate_newsitems_exist_and_finally_one_of_each_class(self):
+        news_item = NewsItem()
+        news_item.title = 'foo'
+        news_item.score = 1
+        news_item.added_at = '2018-12-03 21:00:00+00:00'
+        news_item.save()
+
+        corpus = Corpus()
+        corpus.positive = False
+        corpus.news_item = news_item
+        corpus.save()
+
+        news_item = NewsItem()
+        news_item.title = 'bar'
+        news_item.score = 1
+        news_item.added_at = '2018-12-03 22:00:00+00:00'
+        news_item.save()
+
+        superuser = self.create_superuser('superuser')
+        request = self.mocked_authenticated_request('/admin/rss/newsitemmetric/', superuser)
+        response = self.admin.changelist_view(request)
+
+        self.assertEquals(2, response.context_data['news_items_count'])
+        self.assertEquals(0, response.context_data['news_items_unclassified'])
+        self.assertEquals(2, response.context_data['classification_initial']['positive'])
+        self.assertEquals(0, response.context_data['classification_initial']['negative'])
+        self.assertEquals(1, response.context_data['classification_supervised']['positive'])
+        self.assertEquals(1, response.context_data['classification_supervised']['negative'])
+        self.assertEquals(0, response.context_data['corpus_count']['positive'])
+        self.assertEquals(1, response.context_data['corpus_count']['negative'])
+        self.assertEquals([{'accuracy': 50, 'added_at': '2018-12-03'}], response.context_data['accuracy'])
