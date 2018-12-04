@@ -23,6 +23,7 @@ class Command(BaseCommand):
             sources = Source.objects.filter(name=name)
             if not sources:
                 self.logger.error('Could not find source \'%s\'.' % name)
+                return
         else:
             sources = Source.objects.all()
 
