@@ -24,11 +24,12 @@ class Command(BaseCommand):
 
         if name:
             sources = Source.objects.filter(name=name)
-            if not sources:
-                self.logger.error('Could not find source \'%s\'.' % name)
-                return
         else:
             sources = Source.objects.all()
+
+        if not sources:
+            self.logger.error('No source(s) found.')
+            return
 
         connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.QUEUE_HOSTNAME))
         channel = connection.channel()
