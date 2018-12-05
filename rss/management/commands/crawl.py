@@ -5,13 +5,16 @@ from rss.models.source import Source
 from rss.models.newsitem import NewsItem
 import datetime
 import feedparser
-import pika
 import logging
+import pika
 
 
 class Command(BaseCommand):
     help = 'Crawl RSS feeds'
-    logger = logging.getLogger('rss')
+    logger = None
+
+    def __init__(self):
+        self.logger = logging.getLogger('rss')
 
     def add_arguments(self, parser):
         parser.add_argument('name', nargs='?', type=str)
@@ -36,6 +39,7 @@ class Command(BaseCommand):
 
     def crawl(self, source, channel):
         self.logger.info('Crawling \'%s\'...' % source.name)
+
         try:
             feedparser.USER_AGENT = settings.RSS_CRAWL_USER_AGENT
             feed = feedparser.parse(source.url)
