@@ -1,9 +1,7 @@
 from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.test import TestCase
-import logging
 import mock
-import pika
 from rss.management.commands import classify_requeue
 from rss.models.newsitem import NewsItem
 
@@ -40,7 +38,11 @@ class CommandTestCase(TestCase):
         self.command.handle()
 
         classify_requeue.pika.BlockingConnection.assert_not_called()
-        self.logger.infoassert_called_once_with('All news items are already classified!')
+        classify_requeue.pika.ConnectionParameters.assert_not_called()
+        self.connection.channel.assert_not_called()
+        self.channel.queue_declare.assert_not_called()
+        self.channel.basic_publish.assert_not_called()
+        self.logger.info.assert_called_once_with('All news items are already classified!')
 
     def test_handle_publishes_when_newsitems_exist(self):
         news_item = NewsItem()
