@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.core import serializers
-from rss.models.newsitem import NewsItem
 from rss.models.corpus import Corpus
 from textblob.classifiers import NaiveBayesClassifier
 from random import shuffle
@@ -20,7 +19,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.logger.info('Training classifier...')
-        self.classifier = self.get_classifier()
+
+        try:
+            self.classifier = self.get_classifier()
+        except Exception:
+            self.logger.error('Failed to train the classifier.')
+            return
+
         self.logger.info('Classifier is ready!')
 
         thread_classify = threading.Thread(target=self.classify_consumer, args=(), name='classify')
@@ -53,6 +58,7 @@ class Command(BaseCommand):
             channel.basic_consume(callback, queue=queue)
         except Exception as e:
             self.logger.error(str(e))
+            return
 
         return channel
 
@@ -83,11 +89,11 @@ class Command(BaseCommand):
                 self.logger.info('Classified #{} "{}" as "{}"!'.format(queue_item.id, queue_item.title, classification))
             except Exception as e:
                 channel.basic_nack(delivery_tag=method.delivery_tag)
-                self.logger.error('Could not classify #{}, due to "{}"'.format(queue_item.id, str(e)))
+                self.logger.error('Could not classify the item due to "{}"'.format(str(e)))
         else:
             channel.basic_nack(delivery_tag=method.delivery_tag)
             self.logger.warn('Classifier was not ready when started to classify.')
-            # sleep to wait for classifier's training
+            # sleep to wait for classifier's training, basic_consume() will call this method again as we nacked
             time.sleep(10)
 
     def train_callback(self, channel, method, properties, body):
