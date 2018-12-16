@@ -16,6 +16,11 @@ init:
 	./manage.py loaddata initial_data
 	./manage.py collectstatic --no-input
 
+analyze:
+	docker-compose run --rm app /bin/sh -c "pylint rss/" ; \
+	docker-compose run --rm app /bin/sh -c "python -m pyt --adaptor Django ."
+	docker-compose kill rabbitmq
+
 clean:
 	find . -name *.pyc -delete
 	find . -name __pycache__ -type d -delete
