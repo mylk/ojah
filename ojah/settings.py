@@ -126,11 +126,15 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            'datefmt': "%Y-%m-%d %H:%M:%S"
+            'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
         },
         'simple': {
             'format': '%(levelname)s %(message)s'
+        },
+        'auth': {
+            'format': '%(asctime)s %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
         }
     },
     'handlers': {
@@ -150,6 +154,12 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, 'logs/app.log'),
             'formatter': 'verbose'
+        },
+        'file_admin_auth': {
+            'level': 'WARN',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/admin-auth.log'),
+            'formatter': 'auth'
         }
     },
     'loggers': {
@@ -161,6 +171,10 @@ LOGGING = {
         'rss': {
             'handlers': ['file_app', 'console'],
             'level': 'INFO'
+        },
+        'admin_auth': {
+            'handlers': ['file_admin_auth', 'console'],
+            'level': 'WARN'
         }
     }
 }

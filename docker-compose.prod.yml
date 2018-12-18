@@ -1,9 +1,9 @@
-version: "2"
+version: "3.7"
 services:
     app:
         restart: always
         environment:
-           - DEBUG=0
+            - DEBUG=0
     worker_classify:
         restart: always
     rabbitmq:

@@ -8,9 +8,7 @@ ARG HOST_GROUP_ID
 ADD . /ojah
 WORKDIR /ojah
 
-COPY build/app/crontab /var/spool/cron/crontabs/root
-
-RUN apk add make curl sudo && \
+RUN apk add make curl sudo fail2ban && \
     addgroup -g ${HOST_GROUP_ID} ${HOST_USER_NAME} && \
     adduser -u ${HOST_USER_ID} -G ${HOST_USER_NAME} -s /bin/sh -D ${HOST_USER_NAME} && \
     addgroup sudo && \
@@ -21,6 +19,12 @@ RUN apk add make curl sudo && \
         make deps_dev; \
     fi && \
     make init
+
+# cron
+COPY build/app/crontab /var/spool/cron/crontabs/root
+# fail2ban
+COPY build/app/fail2ban/filter.d/ojah.conf /etc/fail2ban/filter.d/ojah.conf
+COPY build/app/fail2ban/jail.local /etc/fail2ban/jail.local
 
 USER ${HOST_USER_NAME}
 

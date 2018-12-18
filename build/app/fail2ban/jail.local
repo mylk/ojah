@@ -1,0 +1,13 @@
+[django-auth]
+enabled = true
+logpath = /ojah/logs/admin-auth.log
+filter = ojah
+action = iptables-allports
+bantime = 1800
+maxretry = 3
+
+[sshd]
+enabled = false
+
+[sshd-ddos]
+enabled = false

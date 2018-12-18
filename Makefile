@@ -32,4 +32,5 @@ test: clean
 	docker-compose run --rm app /bin/sh -c "./build/worker_classify/wait-for-rabbitmq.sh && ./manage.py test tests.rss.models"
 	docker-compose run --rm app /bin/sh -c "./build/worker_classify/wait-for-rabbitmq.sh && ./manage.py test tests.rss.templatetags"
 	docker-compose run --rm app /bin/sh -c "./build/worker_classify/wait-for-rabbitmq.sh && ./manage.py test tests.rss.views"
+	docker-compose run --rm app /bin/sh -c "./build/worker_classify/wait-for-rabbitmq.sh && ./manage.py test tests.rss.receivers"
 	docker-compose kill rabbitmq
