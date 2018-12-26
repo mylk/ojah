@@ -18,7 +18,8 @@ RUN apk add make curl sudo fail2ban && \
     if [ "${DEBUG}" = "1" ]; then \
         make deps_dev; \
     fi && \
-    make init
+    make init && \
+    touch /ojah/logs/admin-auth.log
 
 # cron
 COPY build/app/crontab /var/spool/cron/crontabs/root
