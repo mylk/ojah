@@ -336,7 +336,7 @@ class CommandTestCase(TestCase):
         self.logger.error.assert_not_called()
         self.logger.warn.assert_not_called()
 
-    def test_classify_callback_auto_publishes_news_item_when_auto_publish_is_enabled(self):
+    def test_classify_callback_does_not_auto_publish_news_item_when_auto_publish_is_enabled_but_class_is_negative(self):
         # change the auto-publish setting to true
         classify.settings.AUTO_PUBLISH = True
         # re-initialize the command as we change the imported value above
@@ -359,11 +359,43 @@ class CommandTestCase(TestCase):
         self.assertEquals('foo', news_items[0].title)
         self.assertEquals(0.00, news_items[0].score)
         # publish is now set to true, because of the enable auto-publish setting
-        self.assertEquals(True, news_items[0].published)
+        self.assertEquals(False, news_items[0].published)
         # un-acknowledged the item got from the queue
         self.channel.basic_ack.assert_called_once()
         # info was logged that the classification was successful
         self.logger.info.called_once_with('Classified #1 "foo" as "neg"!')
+        # no error and warning was logged
+        self.logger.error.assert_not_called()
+        self.logger.warn.assert_not_called()
+
+    def test_classify_callback_auto_publishes_news_item_when_auto_publish_is_enabled_and_class_is_positive(self):
+        # change the auto-publish setting to true
+        classify.settings.AUTO_PUBLISH = True
+        # re-initialize the command as we change the imported value above
+        self.command = classify.Command()
+
+        # make it look like there is a trained classifier that will return a negative class
+        self.command.classifier = mock.MagicMock()
+        self.command.classifier.classify = mock.MagicMock(return_value='pos')
+
+        # call the method being tested
+        self.command.classify_callback(self.channel, mock.MagicMock(), mock.MagicMock(), self.serialized_news_item)
+
+        # info was logged that the classification of the news item begins
+        self.logger.info.called_once_with('Classifying #1...')
+        # the classifier was called with the enqueued news item title
+        self.command.classifier.classify.assert_called_once_with('foo')
+        # news item is updated in database with the score and publish values
+        news_items = NewsItem.objects.all()
+        self.assertEquals(1, len(list(news_items)))
+        self.assertEquals('foo', news_items[0].title)
+        self.assertEquals(1.00, news_items[0].score)
+        # publish is now set to true, because of the enable auto-publish setting
+        self.assertEquals(True, news_items[0].published)
+        # un-acknowledged the item got from the queue
+        self.channel.basic_ack.assert_called_once()
+        # info was logged that the classification was successful
+        self.logger.info.called_once_with('Classified #1 "foo" as "pos"!')
         # no error and warning was logged
         self.logger.error.assert_not_called()
         self.logger.warn.assert_not_called()
