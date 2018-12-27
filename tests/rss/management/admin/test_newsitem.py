@@ -158,8 +158,8 @@ class NewsItemAdminTestCase(TestCase):
         news_item.title = 'foo'
         news_item.published = False
         news_item.save()
-        query_set = [news_item]
 
+        query_set = [news_item]
         self.newsitem.news_item_publish_and_corpus_create_positive(None, None, query_set)
 
         self.newsitem.enqueue_corpus_creation.assert_called_once()
@@ -169,6 +169,40 @@ class NewsItemAdminTestCase(TestCase):
         news_items = NewsItem.objects.all()
         self.assertEquals(1, len(news_items))
         self.assertEquals(True, news_items[0].published)
+
+    def test_news_item_unpublish_and_corpus_create_negative_throws_no_error_when_no_newsitems_in_query_set(self):
+        query_set = []
+        success = False
+        try:
+            self.newsitem.news_item_unpublish_and_corpus_create_negative(None, None, query_set)
+            success = True
+        except:
+            pass
+        self.assertTrue(success)
+
+    def test_news_item_unpublish_and_corpus_create_negative_does_not_enqueue_job_to_retrain_classifier_when_no_newsitems_in_query_set(self):
+        query_set = []
+
+        self.newsitem.news_item_unpublish_and_corpus_create_negative(None, None, query_set)
+        self.newsitem.enqueue_corpus_creation.assert_not_called()
+
+    def test_news_item_publish_and_corpus_create_negative_publishes_newsitems_and_creates_negative_corpora_when_newsitems_in_query_set(self):
+        news_item = NewsItem()
+        news_item.title = 'foo'
+        news_item.publshed = True
+        news_item.score = 1.00
+        news_item.save()
+
+        query_set = [news_item]
+        self.newsitem.news_item_unpublish_and_corpus_create_negative(None, None, query_set)
+
+        self.newsitem.enqueue_corpus_creation.assert_called_once()
+        news_items = NewsItem.object.all()
+        self.assertEquals(1, len(news_items))
+        self.assertFalse(news_items[0].published)
+        corpus = Corpus.object.filter(news_item=news_items[0])
+        self.assertNotEquals(None, corpus)
+        self.assertFalse(corpus.positive)
 
     def test_enqueue_corpus_creation_enqueues_job_to_queue(self):
         self.newsitem.enqueue_corpus_creation = self.newsitem.enqueue_corpus_creation_real

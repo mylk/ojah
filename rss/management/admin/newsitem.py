@@ -59,6 +59,14 @@ def news_item_publish_and_corpus_create_positive(model_admin, request, query_set
 news_item_publish_and_corpus_create_positive.short_description = 'Publish and create positive Corpus'
 
 
+def news_item_unpublish_and_corpus_create_negative(model_admin, request, query_set):
+    corpus_create_negative(model_admin, request, query_set)
+    news_item_unpublish(model_admin, request, query_set)
+
+
+news_item_unpublish_and_corpus_create_negative.short_description = 'Unpublish and create negative Corpus'
+
+
 def enqueue_corpus_creation():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.QUEUE_HOSTNAME))
     channel = connection.channel()
@@ -81,5 +89,6 @@ class NewsItemAdmin(admin.ModelAdmin):
         news_item_unpublish,
         corpus_create_positive,
         corpus_create_negative,
-        news_item_publish_and_corpus_create_positive
+        news_item_publish_and_corpus_create_positive,
+        news_item_unpublish_and_corpus_create_negative
     ]
