@@ -116,7 +116,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 # Logging
@@ -190,3 +193,4 @@ AUTO_PUBLISH = True
 QUEUE_HOSTNAME = 'rabbitmq'
 QUEUE_NAME_CLASSIFY = 'classify'
 QUEUE_NAME_TRAIN = 'train'
+WEB_NEWS_ITEMS_COUNT = 50

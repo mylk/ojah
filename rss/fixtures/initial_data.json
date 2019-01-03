@@ -4,8 +4,9 @@
     "pk": 1,
     "fields": {
       "name": "Reddit - r/news",
-      "url": "https://www.reddit.com/r/news/.rss",
-      "last_crawl": null
+      "url": "https://www.reddit.com/r/news/new/.rss",
+      "last_crawl": null,
+      "homepage": "https://www.reddit.com/r/news/new/"
     }
   }
 ]

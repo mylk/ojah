@@ -3,12 +3,13 @@
 .pydevproject
 .settings
 
-static/*
+staticfiles/*
 logs/*
 
 *.pyc
 __pycache__
 db.sqlite3
 
-!static/.gitkeep
+!staticfiles/.gitkeep
 !logs/.gitkeep
+

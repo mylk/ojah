@@ -9,6 +9,7 @@ class Source(models.Model):
 
     name = models.CharField(max_length=100)
     url = models.CharField(max_length=100)
+    homepage = models.CharField(max_length=100, blank=True, null=True)
     last_crawl = models.DateTimeField(blank=True, null=True)
 
     def crawled(self):

@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="referrer" content="origin">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'web/news.css' %}">
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="//ojah.io/rss">
+    <title>Ojah!</title>
+</head>
+<body>
+    <div id="header">
+        <b class="hnname">Ojah!</b>
+        <a href="/news/">news</a>
+        | <a href="#">about</a>
+        | <a href="https://github.com/mylk/ojah" target="_blank">source</a>
+        | <a href="mailto:milonas.ko@gmail.com">contact</a>
+    </div>
+    <div id="content">
+        {% for news_item in news_items %}
+        <div class="news-item">
+            <a href="{{ news_item.url }}" target="_blank">{{ news_item.title }}</a>
+            <span class="comhead">
+                (<a href="{{ news_item.source.homepage }}" target="_blank">{{ news_item.source.name }}</a>)
+            </span>
+            <div class="subtext">{{ news_item.added_at | timesince }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    <div id="ruler"></div>
+    <div id="footer">
+        <div class="links">
+            <a href="/news/">news</a>
+            | <a href="#">about</a>
+            | <a href="https://github.com/mylk/ojah" target="_blank">source</a>
+            | <a href="mailto:milonas.ko@gmail.com">contact</a>
+        </div>
+    </div>
+</body>
+</html>
