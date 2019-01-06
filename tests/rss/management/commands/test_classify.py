@@ -245,6 +245,33 @@ class CommandTestCase(TestCase):
         # the method returned a non-empty result
         self.assertTrue(classifier != None)
 
+    def test_get_classifier_uses_unique_corpora(self):
+        # mock the shuffle list method
+        classify.shuffle = mock.MagicMock()
+        # regenerate the command class being tested as we mocked an extra module above
+        self.command = classify.Command()
+
+        # create dummy news items and corpora with same title and classification
+        for index in range(1, 3):
+            news_item = NewsItem()
+            news_item.title = 'foo'
+            news_item.save()
+
+            corpus = Corpus()
+            corpus.news_item = news_item
+            corpus.positive = True
+            corpus.save()
+
+        # test that two corpora exist
+        corpora = Corpus.objects.all()
+        self.assertEquals(2, len(corpora))
+
+        # call the method being tested
+        classifier = self.command.get_classifier()
+
+        # shuffled the corpora with only one of the identical corpora
+        classify.shuffle.assert_called_once_with([('foo', 'pos')])
+
     def test_classify_callback_waits_for_classifier_when_no_trained_classifier_exists(self):
         # mock the time module
         classify.time = mock.MagicMock()

@@ -67,6 +67,7 @@ class Command(BaseCommand):
         for corpus in Corpus.objects.all():
             corpora_classified.append((corpus.news_item.title, corpus.get_classification()))
 
+        corpora_classified = list(set(corpora_classified))
         shuffle(corpora_classified)
 
         return NaiveBayesClassifier(corpora_classified)
