@@ -30,7 +30,7 @@ class NewsItemTestCase(TestCase):
         source.name = 'bar'
         source.save()
 
-        exists = self.news_item.exists(title, added_at, source)
+        exists = NewsItem.exists(title, added_at, source)
 
         self.assertEquals(False, exists)
 
@@ -46,7 +46,7 @@ class NewsItemTestCase(TestCase):
         self.news_item.source = source
         self.news_item.save()
 
-        exists = self.news_item.exists(title, added_at, source)
+        exists = NewsItem.exists(title, added_at, source)
 
         self.assertEquals(True, exists)
 

@@ -1,4 +1,5 @@
 #!/bin/sh
 
+make init
 ./build/wait-for-rabbitmq.sh
-./manage.py classify
+./manage.py test

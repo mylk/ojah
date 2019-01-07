@@ -33,6 +33,19 @@ services:
         volumes:
             - ./:/ojah
         depends_on: [rabbitmq]
+    test:
+        build:
+            context: ./
+            dockerfile: build/test/Dockerfile
+            args:
+                - HOST_USER_NAME=mylk
+                - HOST_USER_ID=1000
+                - HOST_GROUP_ID=1000
+        networks:
+            - ojah_net
+        volumes:
+            - ./:/ojah
+        depends_on: [rabbitmq]
     rabbitmq:
         image: rabbitmq:3-management
         networks:

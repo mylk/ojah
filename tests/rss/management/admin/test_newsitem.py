@@ -197,12 +197,12 @@ class NewsItemAdminTestCase(TestCase):
         self.newsitem.news_item_unpublish_and_corpus_create_negative(None, None, query_set)
 
         self.newsitem.enqueue_corpus_creation.assert_called_once()
-        news_items = NewsItem.object.all()
+        news_items = NewsItem.objects.all()
         self.assertEquals(1, len(news_items))
         self.assertFalse(news_items[0].published)
-        corpus = Corpus.object.filter(news_item=news_items[0])
+        corpus = Corpus.objects.filter(news_item=news_items[0])
         self.assertNotEquals(None, corpus)
-        self.assertFalse(corpus.positive)
+        self.assertFalse(corpus[0].positive)
 
     def test_enqueue_corpus_creation_enqueues_job_to_queue(self):
         self.newsitem.enqueue_corpus_creation = self.newsitem.enqueue_corpus_creation_real
