@@ -126,6 +126,12 @@ The default username is `ojah` and the password is `ojah`` too.
 http://127.0.0.1:8000/rss
 ```
 
+- There is also a web interface (clone of [Hacker news](https://news.ycombinator.com/)) to see the news from your web browser:
+
+```
+http://127.0.0.1:8000/news
+```
+
 The administration dashboard has a few more cool things, like statistics and a simple graph for classification accuracy.
 
 ## Hack it!
