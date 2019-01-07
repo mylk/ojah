@@ -1,17 +1,17 @@
 # Ojah!
 
-```Ojah!``` is a news aggregator that filters out the news to give you only those that are positive!
+`Ojah!` is a news aggregator that filters out the news to give you only those that are positive!
 
 ## How it works
 
 A list of RSS feeds is provided to the application. The application crawls the feeds every now and then, stores the news
 and then scores them by performing sentiment analysis on their title. Finally you have to subscribe to the RSS feed of
- ```Ojah!``` to get your positive news!
+`Ojah!` to get your positive news!
 
 
 ## Technical information
 
-```Ojah!``` is written in python3 on top of the ```Django``` web framework. For sentiment analysis, the ```TextBlob```
+`Ojah!` is written in python3 on top of the `Django` web framework. For sentiment analysis, the `TextBlob`
 module is being used.
 
 ### The components
@@ -26,8 +26,8 @@ The first two, are placed on the same container, without any particular reason, 
 
 ### Sentiment analysis
 
-The sentiment analysis classifier currently returns either the ```neg``` or the ```pos``` value for negative or positive
-result respectively. News that are scored with ```pos``` are served by ```Ojah!```.
+The sentiment analysis classifier currently returns either the `neg` or the `pos` value for negative or positive
+result respectively. News that are scored with `pos` are served by `Ojah!`.
 
 ### Used classifier
 
@@ -41,11 +41,11 @@ period of time to find the most accurate between:
 The most accurate was "NaiveBayesClassifier" which I finally kept.
 
 ### Corpora
-I initially used the twitter corpora provided by the ```nltk``` module. Then I used only the corpora produced
-by ```Ojah!``` to improve the accuracy of the sentiment classification.
+I initially used the twitter corpora provided by the `nltk` module. Then I used only the corpora produced
+by `Ojah!` to improve the accuracy of the sentiment classification.
 
-Custom corpora can be added by the administration dashboard of ```Ojah!``` where we can change the classification
-of a news item and use it as a corpus, in order to make ```Ojah!``` learn from its mistakes.
+Custom corpora can be added by the administration dashboard of `Ojah!` where we can change the classification
+of a news item and use it as a corpus, in order to make `Ojah!` learn from its mistakes.
 
 ### Used database
 
