@@ -1,10 +1,12 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.core import serializers
+from nltk.corpus import stopwords
 from rss.models.corpus import Corpus
 from textblob.classifiers import NaiveBayesClassifier
 from random import shuffle
 import pika
+import re
 import threading
 import logging
 import time
@@ -63,9 +65,13 @@ class Command(BaseCommand):
         return channel
 
     def get_classifier(self):
+        stopwords = self.get_stopwords()
+        stopwords_pattern = re.compile(r'\b(' + r'|'.join(stopwords) + r')\b\s*')
+
         corpora_classified = list()
         for corpus in Corpus.objects.all():
-            corpora_classified.append((corpus.news_item.title, corpus.get_classification()))
+            title = stopwords_pattern.sub('', corpus.news_item.title)
+            corpora_classified.append((title, corpus.get_classification()))
 
         corpora_classified = list(set(corpora_classified))
         shuffle(corpora_classified)
@@ -107,3 +113,15 @@ class Command(BaseCommand):
         self.logger.info('train_callback(): Starting training...')
         self.classifier = self.get_classifier()
         self.logger.info('train_callback(): Finished training!')
+
+    def get_stopwords(self):
+        stopwords_whitelisted = [
+            'above', 'out', 'off', 'again', 'against', 'why', 'few', 'more', 'most', 'no', 'nor', 'not', 'only', 'don',
+            'don\'t', 'should', 'should\'ve', 'ain', 'aren', 'aren\'t', 'couldn', 'couldn\'t', 'didn', 'didn\'t', 'doesn',
+            'doesn\'t', 'hadn', 'hadn\'t', 'hasn', 'hasn\'t', 'haven', 'haven\'t', 'isn', 'isn\'t', 'mightn', 'mightn\'t',
+            'needn', 'needn\'t', 'shan', 'shan\'t', 'shouldn', 'shouldn\'t', 'wasn', 'wasn\'t', 'weren', 'weren\'t', 'won',
+            'won\'t', 'wouldn', 'wouldn\'t'
+        ]
+
+        stopwords_diff = [stopword for stopword in stopwords.words('english') if stopword not in stopwords_whitelisted]
+        return stopwords_diff

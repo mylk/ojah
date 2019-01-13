@@ -9,6 +9,7 @@ deps_dev:
 
 deps_corpora:
 	python -m textblob.download_corpora lite
+	python -c "import nltk; nltk.download('stopwords')"
 
 init:
 	./manage.py migrate

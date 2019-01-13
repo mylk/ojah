@@ -272,6 +272,28 @@ class CommandTestCase(TestCase):
         # shuffled the corpora with only one of the identical corpora
         classify.shuffle.assert_called_once_with([('foo', 'pos')])
 
+    def test_get_classifier_uses_corpora_clean_of_stopwords(self):
+        # mock the shuffle list method
+        classify.shuffle = mock.MagicMock()
+        # regenerate the command class being tested as we mocked an extra module above
+        self.command = classify.Command()
+
+        # create dummy news item (having title that contains stopwords) and corpora
+        news_item = NewsItem()
+        news_item.title = 'when foo then bar'
+        news_item.save()
+
+        corpus = Corpus()
+        corpus.news_item = news_item
+        corpus.positive = True
+        corpus.save()
+
+        # call the method being tested
+        classifier = self.command.get_classifier()
+
+        # shuffled the corpora with only one of the identical corpora
+        classify.shuffle.assert_called_once_with([('foo bar', 'pos')])
+
     def test_classify_callback_waits_for_classifier_when_no_trained_classifier_exists(self):
         # mock the time module
         classify.time = mock.MagicMock()
@@ -444,3 +466,11 @@ class CommandTestCase(TestCase):
         self.command.get_classifier.assert_called_once()
         # info was logged
         self.logger.info.assert_any_call('train_callback(): Finished training!')
+
+    def test_get_stopwords_returns_not_filtered_stopword(self):
+        stopwords = self.command.get_stopwords()
+        self.assertTrue('ourselves' in stopwords)
+
+    def test_get_stopwords_does_not_return_filtered_stopword(self):
+        stopwords = self.command.get_stopwords()
+        self.assertFalse('against' in stopwords)

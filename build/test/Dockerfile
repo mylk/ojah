@@ -16,4 +16,6 @@ RUN apk add make curl && \
 
 USER ${HOST_USER_NAME}
 
+RUN make deps_corpora
+
 CMD ["/ojah/build/test/start.sh"]
