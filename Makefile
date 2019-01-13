@@ -8,7 +8,7 @@ deps_dev:
 	pip install -r requirements_dev.txt
 
 deps_corpora:
-	python -m textblob.download_corpora
+	python -m textblob.download_corpora lite
 
 init:
 	./manage.py migrate
