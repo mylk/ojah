@@ -13,7 +13,7 @@ class CorpusMetricAdmin(admin.ModelAdmin):
         )
 
         try:
-            qs = response.context_data['cl'].queryset
+            query_set = response.context_data['cl'].queryset
         except (AttributeError, KeyError):
             return response
 
@@ -22,14 +22,14 @@ class CorpusMetricAdmin(admin.ModelAdmin):
         }
 
         response.context_data['corpus_metrics'] = list(
-            qs
+            query_set
                 .values('positive')
                 .annotate(**metrics)
                 .order_by('-total')
         )
 
         response.context_data['corpus_metrics_total'] = dict(
-            qs.aggregate(**metrics)
+            query_set.aggregate(**metrics)
         )
 
         return response

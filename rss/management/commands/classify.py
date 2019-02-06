@@ -40,15 +40,15 @@ class Command(BaseCommand):
         channel = self.get_consumer(settings.QUEUE_NAME_CLASSIFY, self.classify_callback)
         try:
             channel.start_consuming()
-        except Exception as e:
-            self.logger.error(str(e))
+        except Exception as ex_consume:
+            self.logger.error(str(ex_consume))
 
     def train_consumer(self):
         channel = self.get_consumer(settings.QUEUE_NAME_TRAIN, self.train_callback)
         try:
             channel.start_consuming()
-        except Exception as e:
-            self.logger.error(str(e))
+        except Exception as ex_consume:
+            self.logger.error(str(ex_consume))
 
     def get_consumer(self, queue, callback):
         try:
@@ -58,8 +58,8 @@ class Command(BaseCommand):
             channel.queue_declare(queue=queue, durable=True)
             channel.basic_qos(prefetch_count=1)
             channel.basic_consume(callback, queue=queue)
-        except Exception as e:
-            self.logger.error(str(e))
+        except Exception as ex_consumer:
+            self.logger.error(str(ex_consumer))
             return
 
         return channel
@@ -96,9 +96,9 @@ class Command(BaseCommand):
                 channel.basic_ack(delivery_tag=method.delivery_tag)
 
                 self.logger.info('Classified #{} "{}" as "{}"!'.format(queue_item.id, queue_item.title, classification))
-            except Exception as e:
+            except Exception as ex_classify:
                 channel.basic_nack(delivery_tag=method.delivery_tag)
-                self.logger.error('Could not classify the item due to "{}"'.format(str(e)))
+                self.logger.error('Could not classify the item due to "{}"'.format(str(ex_classify)))
         else:
             channel.basic_nack(delivery_tag=method.delivery_tag)
             self.logger.warn('Classifier was not ready when started to classify.')
@@ -111,8 +111,11 @@ class Command(BaseCommand):
 
         self.classifier = None
         self.logger.info('train_callback(): Starting training...')
-        self.classifier = self.get_classifier()
-        self.logger.info('train_callback(): Finished training!')
+        try:
+            self.classifier = self.get_classifier()
+            self.logger.info('train_callback(): Finished training!')
+        except Exception:
+            self.logger.error('Failed to train the classifier.')
 
     def get_stopwords(self):
         stopwords_whitelisted = [

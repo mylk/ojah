@@ -14,8 +14,8 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
     @staticmethod
     def get_request_params(request):
         params = dict()
-        for k, v in request.GET.lists():
-            params[k] = v[0]
+        for key, val in request.GET.lists():
+            params[key] = val[0]
         return params
 
     @staticmethod
