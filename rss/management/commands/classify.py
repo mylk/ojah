@@ -95,10 +95,10 @@ class Command(BaseCommand):
 
                 channel.basic_ack(delivery_tag=method.delivery_tag)
 
-                self.logger.info('Classified #{} "{}" as "{}"!'.format(queue_item.id, queue_item.title, classification))
+                self.logger.info('Classified #%s "%s" as "%s"!' % (queue_item.id, queue_item.title, classification))
             except Exception as ex_classify:
                 channel.basic_nack(delivery_tag=method.delivery_tag)
-                self.logger.error('Could not classify the item due to "{}"'.format(str(ex_classify)))
+                self.logger.error('Could not classify the item due to "%s"' % str(ex_classify))
         else:
             channel.basic_nack(delivery_tag=method.delivery_tag)
             self.logger.warn('Classifier was not ready when started to classify.')

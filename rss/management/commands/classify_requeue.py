@@ -33,4 +33,4 @@ class Command(BaseCommand):
                 properties=pika.BasicProperties(delivery_mode=2)
             )
 
-            self.logger.info('Successfully re-queued #{} "{}"!'.format(news_item.id, news_item.title))
+            self.logger.info('Successfully re-queued #%s "%s"!' % (news_item.id, news_item.title))
