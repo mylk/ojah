@@ -24,7 +24,7 @@ class Command(BaseCommand):
         connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.QUEUE_HOSTNAME))
         channel = connection.channel()
         channel.queue_declare(queue=settings.QUEUE_NAME_CLASSIFY, durable=True)
-        self.logger.info('Found %s news items that need to be classified.' % len(news_items))
+        self.logger.info('Found %s news items that need to be classified.', len(news_items))
 
         for news_item in news_items:
             body = serializers.serialize('json', [news_item])
@@ -35,4 +35,4 @@ class Command(BaseCommand):
                 properties=pika.BasicProperties(delivery_mode=2)
             )
 
-            self.logger.info('Successfully re-queued #%s "%s"!' % (news_item.id, news_item.title))
+            self.logger.info('Successfully re-queued #%s "%s"!', news_item.id, news_item.title)

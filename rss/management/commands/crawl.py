@@ -41,13 +41,13 @@ class Command(BaseCommand):
             self.crawl(source, channel)
 
     def crawl(self, source, channel):
-        self.logger.info('Crawling \'%s\'...' % source.name)
+        self.logger.info('Crawling \'%s\'...', source.name)
 
         try:
             feedparser.USER_AGENT = settings.RSS_CRAWL_USER_AGENT
             feed = feedparser.parse(source.url)
         except RuntimeError:
-            self.logger.error('Could not crawl \'%s\'.' % source.name)
+            self.logger.error('Could not crawl \'%s\'.', source.name)
             return
 
         for entry in feed['entries']:
@@ -75,4 +75,4 @@ class Command(BaseCommand):
 
         source.crawled()
 
-        self.logger.info('Successfully crawled \'%s\'!' % source.name)
+        self.logger.info('Successfully crawled \'%s\'!', source.name)

@@ -58,5 +58,5 @@ class CommandTestCase(TestCase):
         self.channel.queue_declare.assert_called_once_with(queue=settings.QUEUE_NAME_CLASSIFY, durable=True)
         self.channel.basic_publish.assert_called_once()
 
-        self.logger.info.assert_any_call('Found 1 news items that need to be classified.')
-        self.logger.info.assert_any_call('Successfully re-queued #1 "foo"!')
+        self.logger.info.assert_any_call('Found %s news items that need to be classified.', 1)
+        self.logger.info.assert_any_call('Successfully re-queued #%s "%s"!', 1, 'foo')

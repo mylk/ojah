@@ -177,9 +177,9 @@ class CommandTestCase(TestCase):
         self.command.crawl(source, self.channel)
 
         # logging the start of the crawling
-        self.logger.info.assert_any_call('Crawling \'bar\'...')
+        self.logger.info.assert_any_call('Crawling \'%s\'...', 'bar')
         # error logged
-        self.logger.error.assert_any_call('Could not crawl \'bar\'.')
+        self.logger.error.assert_any_call('Could not crawl \'%s\'.', 'bar')
         # no feed entries so no database transactions them
         crawl.NewsItem.exists.assert_not_called()
         crawl.NewsItem.save.assert_not_called()
@@ -201,7 +201,7 @@ class CommandTestCase(TestCase):
         self.command.crawl(source, self.channel)
 
         # logging the start of the crawling
-        self.logger.info.assert_any_call('Crawling \'bar\'...')
+        self.logger.info.assert_any_call('Crawling \'%s\'...', 'bar')
         # no error logged
         self.logger.error.assert_not_called()
         # existence of news item was performed
@@ -229,7 +229,7 @@ class CommandTestCase(TestCase):
         self.command.crawl(source, self.channel)
 
         # logging the start of the crawling
-        self.logger.info.assert_any_call('Crawling \'bar\'...')
+        self.logger.info.assert_any_call('Crawling \'%s\'...', 'bar')
         # no error logged
         self.logger.error.assert_not_called()
 
@@ -259,7 +259,7 @@ class CommandTestCase(TestCase):
         self.command.crawl(source, self.channel)
 
         # logging the start of the crawling
-        self.logger.info.assert_any_call('Crawling \'bar\'...')
+        self.logger.info.assert_any_call('Crawling \'%s\'...', 'bar')
         # no error logged
         self.logger.error.assert_not_called()
 
@@ -286,7 +286,7 @@ class CommandTestCase(TestCase):
         self.command.crawl(source, self.channel)
 
         # logging the start of the crawling
-        self.logger.info.assert_any_call('Crawling \'bar\'...')
+        self.logger.info.assert_any_call('Crawling \'%s\'...', 'bar')
         # no error logged
         self.logger.error.assert_not_called()
 
