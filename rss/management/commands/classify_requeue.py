@@ -1,9 +1,11 @@
+import logging
+
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.core import serializers
-from rss.models.newsitem import NewsItem
 import pika
-import logging
+
+from rss.models.newsitem import NewsItem
 
 
 class Command(BaseCommand):

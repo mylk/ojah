@@ -1,8 +1,9 @@
 from django.contrib import admin
 from django.conf import settings
-from rss.models.corpus import Corpus
 from rangefilter.filter import DateRangeFilter
 import pika
+
+from rss.models.corpus import Corpus
 
 
 def news_item_publish(model_admin, request, query_set):

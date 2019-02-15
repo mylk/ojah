@@ -1,15 +1,20 @@
-from django.core.management.base import BaseCommand
-from django.conf import settings
-from django.core import serializers
-from nltk.corpus import stopwords
-from rss.models.corpus import Corpus
-from textblob.classifiers import NaiveBayesClassifier
 from random import shuffle
-import pika
 import re
 import threading
 import logging
 import time
+
+from django.conf import settings
+from django.core.management.base import BaseCommand
+from django.core import serializers
+from django.core.serializers.base import DeserializationError
+from django.db import utils
+import pika
+from pika.exceptions import AMQPChannelError, AMQPConnectionError, ChannelClosed, ConnectionClosed, DuplicateConsumerTag, NoFreeChannels
+from nltk.corpus import stopwords
+from textblob.classifiers import NaiveBayesClassifier
+
+from rss.models.corpus import Corpus
 
 
 class Command(BaseCommand):

@@ -1,10 +1,12 @@
+import calendar
+from datetime import datetime
+
 from django.contrib import admin
 from django.conf import settings
+
 from rss.models.newsitem import NewsItem
 from rss.models.newsitem_metric import NewsItemMetric
 from rss.models.corpus import Corpus
-from datetime import datetime
-import calendar
 
 
 class NewsItemMetricAdmin(admin.ModelAdmin):

@@ -1,12 +1,14 @@
+import datetime
+import logging
+
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.core import serializers
+import feedparser
+import pika
+
 from rss.models.source import Source
 from rss.models.newsitem import NewsItem
-import datetime
-import feedparser
-import logging
-import pika
 
 
 class Command(BaseCommand):

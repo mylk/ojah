@@ -1,7 +1,12 @@
+import mock
+
 from django.conf import settings
 from django.core import serializers
+from django.core.serializers.base import DeserializationError
+from django.db.utils import DatabaseError
 from django.test import TestCase
-import mock
+from pika.exceptions import ChannelClosed, DuplicateConsumerTag, NoFreeChannels
+
 from rss.management.commands import classify
 from rss.models.corpus import Corpus
 from rss.models.newsitem import NewsItem
