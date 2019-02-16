@@ -29,7 +29,7 @@ class Command(BaseCommand):
 
         try:
             self.classifier = self.get_classifier()
-        except Exception:
+        except (utils.Error, utils.DataError, utils.DatabaseError) as ex_db:
             self.logger.error('Failed to train the classifier.')
             return
 
@@ -45,14 +45,14 @@ class Command(BaseCommand):
         channel = self.get_consumer(settings.QUEUE_NAME_CLASSIFY, self.classify_callback)
         try:
             channel.start_consuming()
-        except Exception as ex_consume:
+        except (AMQPConnectionError, AMQPChannelError, ChannelClosed, ConnectionClosed, NoFreeChannels) as ex_consume:
             self.logger.error(str(ex_consume))
 
     def train_consumer(self):
         channel = self.get_consumer(settings.QUEUE_NAME_TRAIN, self.train_callback)
         try:
             channel.start_consuming()
-        except Exception as ex_consume:
+        except (AMQPConnectionError, AMQPChannelError, ChannelClosed, ConnectionClosed, NoFreeChannels) as ex_consume:
             self.logger.error(str(ex_consume))
 
     def get_consumer(self, queue, callback):
@@ -63,7 +63,7 @@ class Command(BaseCommand):
             channel.queue_declare(queue=queue, durable=True)
             channel.basic_qos(prefetch_count=1)
             channel.basic_consume(callback, queue=queue)
-        except Exception as ex_consumer:
+        except DuplicateConsumerTag as ex_consumer:
             self.logger.error(str(ex_consumer))
             return
 
@@ -87,25 +87,42 @@ class Command(BaseCommand):
         if self.classifier:
             try:
                 queue_items = serializers.deserialize('json', body)
+            except DeserializationError as ex_deserialize:
+                self.reject_queue_item(channel, method)
+                self.logger.error('Classifier failed to deserialize body.')
+                return
+
+            try:
                 queue_item = next(queue_items).object
+            except (StopIteration, RuntimeError) as ex_item:
+                self.reject_queue_item(channel, method)
+                self.logger.error('Classifier failed to get object from deserialized body.')
+                return
 
-                self.logger.info('Classifying #%s...' % queue_item.id)
-                classification = self.classifier.classify(queue_item.title)
+            self.logger.info('Classifying #%s...', queue_item.id)
+            classification = self.classifier.classify(queue_item.title)
 
+            try:
                 queue_item.score = 1 if classification == 'pos' else 0
                 queue_item.published = False
                 if settings.AUTO_PUBLISH and classification == 'pos':
                     queue_item.published = True
                 queue_item.save()
+            except (FieldDoesNotExist, FieldError, ValidationError) as ex_save:
+                self.reject_queue_item(channel, method)
+                self.logger.error('Classifier could not save the item due to "%s"', str(ex_save))
+                return
 
+            try:
                 channel.basic_ack(delivery_tag=method.delivery_tag)
+            except (AMQPConnectionError, AMQPChannelError, ChannelClosed, ConnectionClosed, NoFreeChannels) as ex_ack:
+                self.reject_queue_item(channel, method)
+                self.logger.error('Classifier could acknowledge item due to "%s"', str(ex_ack))
+                return
 
-                self.logger.info('Classified #%s "%s" as "%s"!' % (queue_item.id, queue_item.title, classification))
-            except Exception as ex_classify:
-                channel.basic_nack(delivery_tag=method.delivery_tag)
-                self.logger.error('Could not classify the item due to "%s"' % str(ex_classify))
+            self.logger.info('Classified #%s "%s" as "%s"!', queue_item.id, queue_item.title, classification)
         else:
-            channel.basic_nack(delivery_tag=method.delivery_tag)
+            self.reject_queue_item(channel, method)
             self.logger.warn('Classifier was not ready when started to classify.')
             # sleep to wait for classifier's training, basic_consume() will call this method again as we nacked
             time.sleep(10)
@@ -119,7 +136,7 @@ class Command(BaseCommand):
         try:
             self.classifier = self.get_classifier()
             self.logger.info('train_callback(): Finished training!')
-        except Exception:
+        except (utils.Error, utils.DataError, utils.DatabaseError) as ex_db:
             self.logger.error('Failed to train the classifier.')
 
     def get_stopwords(self):
@@ -133,3 +150,9 @@ class Command(BaseCommand):
 
         stopwords_diff = [stopword for stopword in stopwords.words('english') if stopword not in stopwords_whitelisted]
         return stopwords_diff
+
+    def reject_queue_item(self, channel, method):
+        try:
+            channel.basic_nack(delivery_tag=method.delivery_tag)
+        except (AMQPConnectionError, AMQPChannelError, ChannelClosed, ConnectionClosed, NoFreeChannels) as ex_ack:
+            self.logger.error('Classifier could not nack message.')

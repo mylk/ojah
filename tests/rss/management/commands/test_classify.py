@@ -51,6 +51,11 @@ class CommandTestCase(TestCase):
         news_item.title = 'foo'
         self.serialized_news_item = serializers.serialize('json', [news_item])
 
+        news_item = NewsItem()
+        news_item.title = 'foo'
+        news_item.published = 'foo'
+        self.serialized_news_item_crap = serializers.serialize('json', [news_item])
+
         # mock the logger
         self.logger = mock.MagicMock()
         classify.logging.getLogger = mock.MagicMock(return_value=self.logger)
@@ -66,7 +71,7 @@ class CommandTestCase(TestCase):
 
     def test_handle_fails_when_classifier_training_fails(self):
         # force method to raise an exception
-        self.command.get_classifier = mock.MagicMock(side_effect=Exception('foo'))
+        self.command.get_classifier = mock.MagicMock(side_effect=DatabaseError('foo'))
 
         # call the method being tested
         self.command.handle()
@@ -95,7 +100,7 @@ class CommandTestCase(TestCase):
     def test_classify_consumer_handles_exception_when_starting_consuming_the_queue(self):
         # mock channel and force to raise an exception
         channel = mock.MagicMock()
-        channel.start_consuming = mock.MagicMock(side_effect=Exception('foo'))
+        channel.start_consuming = mock.MagicMock(side_effect=ChannelClosed('foo'))
         self.command.get_consumer = mock.MagicMock(return_value=channel)
         # mock the callback called when a message is consumed from the queue
         self.command.classify_callback = mock.MagicMock()
@@ -129,7 +134,7 @@ class CommandTestCase(TestCase):
     def test_train_consumer_handles_exception_when_starting_consuming_the_queue(self):
         # mock channel and force to raise an exception
         channel = mock.MagicMock()
-        channel.start_consuming = mock.MagicMock(side_effect=Exception('foo'))
+        channel.start_consuming = mock.MagicMock(side_effect=ChannelClosed('foo'))
         self.command.get_consumer = mock.MagicMock(return_value=channel)
         # mock the callback called when a message is consumed from the queue
         self.command.train_callback = mock.MagicMock()
@@ -162,7 +167,7 @@ class CommandTestCase(TestCase):
 
     def test_get_consumer_handles_exception_when_connecting_to_broker(self):
         # mock queue consume method and force it to raise an exception
-        self.channel.basic_consume = mock.MagicMock(side_effect=Exception('foo'))
+        self.channel.basic_consume = mock.MagicMock(side_effect=DuplicateConsumerTag('foo'))
         # just create a fake method to be used as a callback parameter
         classify_callback = mock.MagicMock()
 
@@ -319,9 +324,9 @@ class CommandTestCase(TestCase):
         # waited for the classifier to be trained
         classify.time.sleep.assert_called_once()
 
-    def test_classify_callback_handles_exceptions_when_classifying(self):
+    def test_classify_callback_handles_exceptions_when_message_is_not_json(self):
         # mock the deserialize method and force it to raise an exception
-        classify.serializers.deserialize = mock.MagicMock(side_effect=Exception('foo'))
+        classify.serializers.deserialize = mock.MagicMock(side_effect=DeserializationError('foo'))
         # regenerate the command class being tested as we mocked an extra module above
         self.command = classify.Command()
         # make it look like there is a trained classifier
@@ -335,7 +340,40 @@ class CommandTestCase(TestCase):
         # un-acknowledged the item got from the queue
         self.channel.basic_nack.assert_called_once()
         # error was logged
-        self.logger.error.assert_called_once_with('Could not classify the item due to "foo"')
+        self.logger.error.assert_called_once_with('Classifier failed to deserialize body.')
+
+    def test_classify_callback_handles_exceptions_when_message_is_not_a_valid_news_item(self):
+        # regenerate the command class being tested as we mocked an extra module above
+        self.command = classify.Command()
+        # make it look like there is a trained classifier
+        self.command.classifier = mock.MagicMock()
+        # the supposed body of the enqueued item
+        body = '[]'
+
+        # call the method being tested
+        self.command.classify_callback(self.channel, mock.MagicMock(), mock.MagicMock(), body)
+
+        # un-acknowledged the item got from the queue
+        self.channel.basic_nack.assert_called_once()
+        # error was logged
+        self.logger.error.assert_called_once_with('Classifier failed to get object from deserialized body.')
+
+    def test_classify_callback_handles_exceptions_when_acknowledge_fails(self):
+        # mock the deserialize method and force it to raise an exception
+        channel = mock.MagicMock()
+        channel.basic_ack = mock.MagicMock(side_effect=NoFreeChannels('foo'))
+        # regenerate the command class being tested as we mocked an extra module above
+        self.command = classify.Command()
+        # make it look like there is a trained classifier
+        self.command.classifier = mock.MagicMock()
+
+        # call the method being tested
+        self.command.classify_callback(channel, mock.MagicMock(), mock.MagicMock(), self.serialized_news_item)
+
+        # un-acknowledged the item got from the queue
+        channel.basic_nack.assert_called_once()
+        # error was logged
+        self.logger.error.assert_called_once_with('Classifier could acknowledge item due to "%s"', 'foo')
 
     def test_classify_callback_classifies_negative_queue_item_and_saves_on_database(self):
         # make it look like there is a trained classifier that will return a negative class
@@ -479,3 +517,29 @@ class CommandTestCase(TestCase):
     def test_get_stopwords_does_not_return_filtered_stopword(self):
         stopwords = self.command.get_stopwords()
         self.assertFalse('against' in stopwords)
+
+    def test_reject_queue_item_does_not_handle_exception_when_non_exiting(self):
+        # mock the deserialize method and force it to raise an exception
+        channel = mock.MagicMock()
+        channel.basic_nack = mock.MagicMock()
+
+        # regenerate the command class being tested as we mocked an extra module above
+        self.command = classify.Command()
+
+        # call the method being tested
+        self.command.reject_queue_item(channel, mock.MagicMock())
+        # no error was logged
+        self.logger.error.assert_not_called()
+
+    def test_reject_queue_handles_exception_while_nack_message(self):
+        # mock the deserialize method and force it to raise an exception
+        channel = mock.MagicMock()
+        channel.basic_nack = mock.MagicMock(side_effect=ChannelClosed('foo'))
+
+        # regenerate the command class being tested as we mocked an extra module above
+        self.command = classify.Command()
+
+        # call the method being tested
+        self.command.reject_queue_item(channel, mock.MagicMock())
+        # error was logged
+        self.logger.error.assert_any_call('Classifier could not nack message.')
