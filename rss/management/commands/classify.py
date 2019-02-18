@@ -139,7 +139,8 @@ class Command(BaseCommand):
         except (utils.Error, utils.DataError, utils.DatabaseError) as ex_db:
             self.logger.error('Failed to train the classifier.')
 
-    def get_stopwords(self):
+    @staticmethod
+    def get_stopwords():
         stopwords_whitelisted = [
             'above', 'out', 'off', 'again', 'against', 'why', 'few', 'more', 'most', 'no', 'nor', 'not', 'only', 'don',
             'don\'t', 'should', 'should\'ve', 'ain', 'aren', 'aren\'t', 'couldn', 'couldn\'t', 'didn', 'didn\'t', 'doesn',
