@@ -23,9 +23,9 @@ class CorpusMetricAdmin(admin.ModelAdmin):
 
         response.context_data['corpus_metrics'] = list(
             query_set
-                .values('positive')
-                .annotate(**metrics)
-                .order_by('-total')
+            .values('positive')
+            .annotate(**metrics)
+            .order_by('-total')
         )
 
         response.context_data['corpus_metrics_total'] = dict(
