@@ -17,7 +17,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Corpus',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(
+                    auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
+                ),
                 ('positive', models.BooleanField(default=False)),
                 ('added_at', models.DateTimeField(default=django.utils.timezone.now)),
             ],
@@ -28,7 +30,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='NewsItem',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(
+                    auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
+                ),
                 ('title', models.CharField(max_length=200)),
                 ('description', models.TextField()),
                 ('url', models.URLField(null=True)),
@@ -42,7 +46,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Source',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(
+                    auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
+                ),
                 ('name', models.CharField(max_length=100)),
                 ('url', models.CharField(max_length=100)),
                 ('last_crawl', models.DateTimeField(blank=True, null=True)),
@@ -54,11 +60,15 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='newsitem',
             name='source',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING, to='rss.Source'),
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.DO_NOTHING, to='rss.Source'
+            ),
         ),
         migrations.AddField(
             model_name='corpus',
             name='news_item',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='rss.NewsItem'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.DO_NOTHING, to='rss.NewsItem'
+            ),
         ),
     ]

@@ -5,12 +5,14 @@ import logging
 import time
 
 from django.conf import settings
+from django.core.exceptions import FieldDoesNotExist, FieldError, ValidationError
 from django.core.management.base import BaseCommand
 from django.core import serializers
 from django.core.serializers.base import DeserializationError
 from django.db import utils
 import pika
-from pika.exceptions import AMQPChannelError, AMQPConnectionError, ChannelClosed, ConnectionClosed, DuplicateConsumerTag, NoFreeChannels
+from pika.exceptions import AMQPChannelError, AMQPConnectionError, ChannelClosed, \
+ConnectionClosed, DuplicateConsumerTag, NoFreeChannels
 from nltk.corpus import stopwords
 from textblob.classifiers import NaiveBayesClassifier
 
@@ -45,19 +47,29 @@ class Command(BaseCommand):
         channel = self.get_consumer(settings.QUEUE_NAME_CLASSIFY, self.classify_callback)
         try:
             channel.start_consuming()
-        except (AMQPConnectionError, AMQPChannelError, ChannelClosed, ConnectionClosed, NoFreeChannels) as ex_consume:
+        except (
+                AMQPConnectionError, AMQPChannelError, ChannelClosed, ConnectionClosed,
+                NoFreeChannels
+        ) as ex_consume:
             self.logger.error(str(ex_consume))
 
     def train_consumer(self):
         channel = self.get_consumer(settings.QUEUE_NAME_TRAIN, self.train_callback)
         try:
             channel.start_consuming()
-        except (AMQPConnectionError, AMQPChannelError, ChannelClosed, ConnectionClosed, NoFreeChannels) as ex_consume:
+        except (
+                AMQPConnectionError, AMQPChannelError, ChannelClosed, ConnectionClosed,
+                NoFreeChannels
+        ) as ex_consume:
             self.logger.error(str(ex_consume))
 
     def get_consumer(self, queue, callback):
         try:
-            params = pika.ConnectionParameters(host=settings.QUEUE_HOSTNAME, heartbeat_interval=600, blocked_connection_timeout=300)
+            params = pika.ConnectionParameters(
+                host=settings.QUEUE_HOSTNAME,
+                heartbeat_interval=600,
+                blocked_connection_timeout=300
+            )
             connection = pika.BlockingConnection(params)
             channel = connection.channel()
             channel.queue_declare(queue=queue, durable=True)
@@ -115,16 +127,22 @@ class Command(BaseCommand):
 
             try:
                 channel.basic_ack(delivery_tag=method.delivery_tag)
-            except (AMQPConnectionError, AMQPChannelError, ChannelClosed, ConnectionClosed, NoFreeChannels) as ex_ack:
+            except (
+                    AMQPConnectionError, AMQPChannelError, ChannelClosed,
+                    ConnectionClosed, NoFreeChannels
+            ) as ex_ack:
                 self.reject_queue_item(channel, method)
                 self.logger.error('Classifier could acknowledge item due to "%s"', str(ex_ack))
                 return
 
-            self.logger.info('Classified #%s "%s" as "%s"!', queue_item.id, queue_item.title, classification)
+            self.logger.info(
+                'Classified #%s "%s" as "%s"!', queue_item.id, queue_item.title, classification
+            )
         else:
             self.reject_queue_item(channel, method)
             self.logger.warn('Classifier was not ready when started to classify.')
-            # sleep to wait for classifier's training, basic_consume() will call this method again as we nacked
+            # sleep to wait for classifier's training
+            # basic_consume() will call this method again as we nacked
             time.sleep(10)
 
     def train_callback(self, channel, method, properties, body):
@@ -142,18 +160,25 @@ class Command(BaseCommand):
     @staticmethod
     def get_stopwords():
         stopwords_whitelisted = [
-            'above', 'out', 'off', 'again', 'against', 'why', 'few', 'more', 'most', 'no', 'nor', 'not', 'only', 'don',
-            'don\'t', 'should', 'should\'ve', 'ain', 'aren', 'aren\'t', 'couldn', 'couldn\'t', 'didn', 'didn\'t', 'doesn',
-            'doesn\'t', 'hadn', 'hadn\'t', 'hasn', 'hasn\'t', 'haven', 'haven\'t', 'isn', 'isn\'t', 'mightn', 'mightn\'t',
-            'needn', 'needn\'t', 'shan', 'shan\'t', 'shouldn', 'shouldn\'t', 'wasn', 'wasn\'t', 'weren', 'weren\'t', 'won',
-            'won\'t', 'wouldn', 'wouldn\'t'
+            'above', 'out', 'off', 'again', 'against', 'why', 'few', 'more', 'most', 'no', 'nor',
+            'not', 'only', 'don', 'don\'t', 'should', 'should\'ve', 'ain', 'aren', 'aren\'t',
+            'couldn', 'couldn\'t', 'didn', 'didn\'t', 'doesn', 'doesn\'t', 'hadn', 'hadn\'t',
+            'hasn', 'hasn\'t', 'haven', 'haven\'t', 'isn', 'isn\'t', 'mightn', 'mightn\'t',
+            'needn', 'needn\'t', 'shan', 'shan\'t', 'shouldn', 'shouldn\'t', 'wasn', 'wasn\'t',
+            'weren', 'weren\'t', 'won', 'won\'t', 'wouldn', 'wouldn\'t'
         ]
 
-        stopwords_diff = [stopword for stopword in stopwords.words('english') if stopword not in stopwords_whitelisted]
+        stopwords_diff = [
+            stopword for stopword in stopwords.words('english') \
+            if stopword not in stopwords_whitelisted
+        ]
         return stopwords_diff
 
     def reject_queue_item(self, channel, method):
         try:
             channel.basic_nack(delivery_tag=method.delivery_tag)
-        except (AMQPConnectionError, AMQPChannelError, ChannelClosed, ConnectionClosed, NoFreeChannels) as ex_ack:
+        except (
+                AMQPConnectionError, AMQPChannelError, ChannelClosed, ConnectionClosed,
+                NoFreeChannels
+        ) as ex_ack:
             self.logger.error('Classifier could not nack message.')

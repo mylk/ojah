@@ -46,8 +46,12 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
             to_day = calendar.monthrange(int(to_year), int(to_month))[-1]
 
         return {
-            'date_from': '{}-{:02d}-{:02d} 00:00:00'.format(from_year, int(from_month), int(from_day)),
-            'date_to': '{}-{:02d}-{:02d} 23:59:59'.format(to_year, int(to_month), int(to_day))
+            'date_from': '{}-{:02d}-{:02d} 00:00:00'.format(
+                from_year, int(from_month), int(from_day)
+            ),
+            'date_to': '{}-{:02d}-{:02d} 23:59:59'.format(
+                to_year, int(to_month), int(to_day)
+            )
         }
 
     def changelist_view(self, request, extra_context=None):
@@ -71,7 +75,9 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
         news_items_count = NewsItem.objects.filter(**params).count()
         response.context_data['news_items_count'] = news_items_count
 
-        news_items_count_unclassified = (news_items_count - (news_items_count_positive + news_items_count_negative))
+        news_items_count_unclassified = (
+            news_items_count - (news_items_count_positive + news_items_count_negative)
+        )
         response.context_data['news_items_unclassified'] = news_items_count_unclassified
 
         response.context_data['classification_initial'] = {
@@ -92,8 +98,12 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
 
         # calculate news items after supervision
         response.context_data['classification_supervised'] = {
-            'positive': ((news_items_count_positive - corpus_count_negative) + corpus_count_positive),
-            'negative': ((news_items_count_negative - corpus_count_positive) + corpus_count_negative),
+            'positive': (
+                (news_items_count_positive - corpus_count_negative) + corpus_count_positive
+            ),
+            'negative': (
+                (news_items_count_negative - corpus_count_positive) + corpus_count_negative
+            ),
         }
 
         # calculate accuracy over time

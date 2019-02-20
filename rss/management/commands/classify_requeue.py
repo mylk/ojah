@@ -21,7 +21,9 @@ class Command(BaseCommand):
             self.logger.info('All news items are already classified!')
             return
 
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.QUEUE_HOSTNAME))
+        connection = pika.BlockingConnection(
+            pika.ConnectionParameters(host=settings.QUEUE_HOSTNAME)
+        )
         channel = connection.channel()
         channel.queue_declare(queue=settings.QUEUE_NAME_CLASSIFY, durable=True)
         self.logger.info('Found %s news items that need to be classified.', len(news_items))

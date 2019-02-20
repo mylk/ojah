@@ -57,7 +57,9 @@ def news_item_publish_and_corpus_create_positive(model_admin, request, query_set
     news_item_publish(model_admin, request, query_set)
 
 
-news_item_publish_and_corpus_create_positive.short_description = 'Publish and create positive Corpus'
+news_item_publish_and_corpus_create_positive.short_description = '''
+Publish and create positive Corpus
+'''
 
 
 def news_item_unpublish_and_corpus_create_negative(model_admin, request, query_set):
@@ -65,7 +67,9 @@ def news_item_unpublish_and_corpus_create_negative(model_admin, request, query_s
     news_item_unpublish(model_admin, request, query_set)
 
 
-news_item_unpublish_and_corpus_create_negative.short_description = 'Unpublish and create negative Corpus'
+news_item_unpublish_and_corpus_create_negative.short_description = '''
+Unpublish and create negative Corpus
+'''
 
 
 def enqueue_corpus_creation():

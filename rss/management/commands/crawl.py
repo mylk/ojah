@@ -33,7 +33,9 @@ class Command(BaseCommand):
             self.logger.error('No source(s) found.')
             return
 
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.QUEUE_HOSTNAME))
+        connection = pika.BlockingConnection(
+            pika.ConnectionParameters(host=settings.QUEUE_HOSTNAME)
+        )
         channel = connection.channel()
         channel.queue_declare(queue=settings.QUEUE_NAME_CLASSIFY, durable=True)
 
@@ -62,7 +64,9 @@ class Command(BaseCommand):
             news_item.url = entry['link']
             news_item.source = source
             news_item.score = None
-            news_item.added_at = datetime.datetime.strptime(entry['updated'], '%Y-%m-%dT%H:%M:%S%z')
+            news_item.added_at = datetime.datetime.strptime(
+                entry['updated'], '%Y-%m-%dT%H:%M:%S%z'
+            )
             news_item.save()
 
             body = serializers.serialize('json', [news_item])
