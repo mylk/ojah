@@ -77,7 +77,7 @@ class Command(BaseCommand):
             channel.basic_consume(callback, queue=queue)
         except DuplicateConsumerTag as ex_consumer:
             self.logger.error(str(ex_consumer))
-            return
+            return None
 
         return channel
 
