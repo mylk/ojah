@@ -20,6 +20,6 @@ def log_failed_login(sender, credentials, request, **kwargs):
                 remote_address_field = field
                 break
 
-        logger_auth.warn('Login failed from %s', request.META.get(remote_address_field))
+        logger_auth.warning('Login failed from %s', request.META.get(remote_address_field))
     except Exception as e:
         logger_app.error('Could not log authentication failure.')

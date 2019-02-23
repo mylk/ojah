@@ -69,7 +69,7 @@ class LoginTestCase(TestCase):
         self.admin_login_post(self.VALID_USERNAME, 'foo')
 
         # the login failure was logged
-        self.logger.warn.assert_called_once_with('Login failed from %s', '127.0.0.1')
+        self.logger.warning.assert_called_once_with('Login failed from %s', '127.0.0.1')
         # no error was logged
         self.logger.error.assert_not_called()
 
@@ -78,7 +78,7 @@ class LoginTestCase(TestCase):
         self.admin_login_post(self.VALID_USERNAME, self.VALID_PASSWORD)
 
         # no login failure was logged
-        self.logger.warn.assert_not_called()
+        self.logger.warning.assert_not_called()
         # no error was logged
         self.logger.error.assert_not_called()
 
@@ -87,7 +87,7 @@ class LoginTestCase(TestCase):
         self.admin_login_get()
 
         # no login failure was logged
-        self.logger.warn.assert_not_called()
+        self.logger.warning.assert_not_called()
         # no error was logged
         self.logger.error.assert_not_called()
 
@@ -100,7 +100,7 @@ class LoginTestCase(TestCase):
         login.log_failed_login(self.sender, self.credentials, self.request)
 
         # logged the failure with the REMOTE_ADDR value
-        self.logger.warn.assert_called_once_with('Login failed from %s', '192.168.1.1')
+        self.logger.warning.assert_called_once_with('Login failed from %s', '192.168.1.1')
 
     def test_log_failed_login_logs_x_forwarded_for_when_exists(self):
         # make the request contain both remote address values
@@ -111,7 +111,7 @@ class LoginTestCase(TestCase):
         login.log_failed_login(self.sender, self.credentials, self.request)
 
         # logged the failure with the HTTP_X_FORWARDED_FOR value
-        self.logger.warn.assert_called_once_with('Login failed from %s', '192.168.1.2')
+        self.logger.warning.assert_called_once_with('Login failed from %s', '192.168.1.2')
 
     def test_log_failed_login_handles_raised_exeption(self):
         # mock the request object
@@ -123,6 +123,6 @@ class LoginTestCase(TestCase):
         login.log_failed_login(self.sender, self.credentials, self.request)
 
         # no login failure was logged
-        self.logger.warn.assert_not_called()
+        self.logger.warning.assert_not_called()
         # error was logged
         self.logger.error.assert_called_once_with('Could not log authentication failure.')

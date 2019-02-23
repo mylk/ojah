@@ -320,7 +320,7 @@ class CommandTestCase(TestCase):
         # un-acknowledged the item got from the queue
         self.channel.basic_nack.assert_called_once()
         # a warning was logged
-        self.logger.warn.assert_called_once_with('Classifier was not ready when started to classify.')
+        self.logger.warning.assert_called_once_with('Classifier was not ready when started to classify.')
         # waited for the classifier to be trained
         classify.time.sleep.assert_called_once()
 
@@ -400,7 +400,7 @@ class CommandTestCase(TestCase):
         self.logger.info.called_once_with('Classified #1 "foo" as "neg"!')
         # no error and warning was logged
         self.logger.error.assert_not_called()
-        self.logger.warn.assert_not_called()
+        self.logger.warning.assert_not_called()
 
     def test_classify_callback_classifies_positive_queue_item_and_saves_on_database(self):
         # make it look like there is a trained classifier that will return a negative class
@@ -426,7 +426,7 @@ class CommandTestCase(TestCase):
         self.logger.info.called_once_with('Classified #1 "foo" as "pos"!')
         # no error and warning was logged
         self.logger.error.assert_not_called()
-        self.logger.warn.assert_not_called()
+        self.logger.warning.assert_not_called()
 
     def test_classify_callback_does_not_auto_publish_news_item_when_auto_publish_is_enabled_but_class_is_negative(self):
         # change the auto-publish setting to true
@@ -458,7 +458,7 @@ class CommandTestCase(TestCase):
         self.logger.info.called_once_with('Classified #1 "foo" as "neg"!')
         # no error and warning was logged
         self.logger.error.assert_not_called()
-        self.logger.warn.assert_not_called()
+        self.logger.warning.assert_not_called()
 
     def test_classify_callback_auto_publishes_news_item_when_auto_publish_is_enabled_and_class_is_positive(self):
         # change the auto-publish setting to true
@@ -490,7 +490,7 @@ class CommandTestCase(TestCase):
         self.logger.info.called_once_with('Classified #1 "foo" as "pos"!')
         # no error and warning was logged
         self.logger.error.assert_not_called()
-        self.logger.warn.assert_not_called()
+        self.logger.warning.assert_not_called()
 
     def test_train_callback_purges_queue_and_trains_classifier(self):
         # mock the method that trains the classifier

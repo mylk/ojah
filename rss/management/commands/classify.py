@@ -140,7 +140,7 @@ class Command(BaseCommand):
             )
         else:
             self.reject_queue_item(channel, method)
-            self.logger.warn('Classifier was not ready when started to classify.')
+            self.logger.warning('Classifier was not ready when started to classify.')
             # sleep to wait for classifier's training
             # basic_consume() will call this method again as we nacked
             time.sleep(10)
