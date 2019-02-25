@@ -31,7 +31,7 @@ def corpus_create_positive(model_admin, request, query_set):
         corpus.positive = True
         corpus.save()
 
-    if len(query_set):
+    if query_set:
         enqueue_corpus_creation()
 
 
@@ -45,7 +45,7 @@ def corpus_create_negative(model_admin, request, query_set):
         corpus.positive = False
         corpus.save()
 
-    if len(query_set):
+    if query_set:
         enqueue_corpus_creation()
 
 
