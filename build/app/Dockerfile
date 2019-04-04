@@ -8,7 +8,7 @@ ARG HOST_GROUP_ID
 ADD . /ojah
 WORKDIR /ojah
 
-RUN apk add make curl sudo fail2ban && \
+RUN apk add make curl sudo gcc libc-dev linux-headers fail2ban && \
     addgroup -g ${HOST_GROUP_ID} ${HOST_USER_NAME} && \
     adduser -u ${HOST_USER_ID} -G ${HOST_USER_NAME} -s /bin/sh -D ${HOST_USER_NAME} && \
     addgroup sudo && \
