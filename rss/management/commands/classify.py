@@ -83,8 +83,8 @@ class Command(BaseCommand):
         return channel
 
     def get_classifier(self):
-        stopwords = self.get_stopwords()
-        stopwords_pattern = re.compile(r'\b(' + r'|'.join(stopwords) + r')\b\s*')
+        stopwords_blacklisted = self.get_stopwords()
+        stopwords_pattern = re.compile(r'\b(' + r'|'.join(stopwords_blacklisted) + r')\b\s*')
 
         corpora_classified = list()
         for corpus in Corpus.objects.all():
