@@ -16,6 +16,7 @@ class Command(BaseCommand):
     logger = None
 
     def __init__(self):
+        super(Command, self).__init__()
         self.logger = logging.getLogger('rss')
 
     def add_arguments(self, parser):

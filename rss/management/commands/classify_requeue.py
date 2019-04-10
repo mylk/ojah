@@ -12,6 +12,7 @@ class Command(BaseCommand):
     help = 'Re-queue for classification the news items missing score'
 
     def __init__(self):
+        super(Command, self).__init__()
         self.logger = logging.getLogger('rss')
 
     def handle(self, *args, **options):

@@ -24,6 +24,7 @@ class Command(BaseCommand):
     classifier = None
 
     def __init__(self):
+        super(Command, self).__init__()
         self.logger = logging.getLogger('rss')
 
     def handle(self, *args, **options):
