@@ -14,16 +14,14 @@ RUN apk add make curl sudo gcc libc-dev linux-headers fail2ban && \
     addgroup sudo && \
     addgroup mylk sudo && \
     echo "${HOST_USER_NAME} ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers && \
-    make deps_app && \
+    make deps_crawler && \
     if [ "${DEBUG}" = "1" ]; then \
         make deps_dev; \
-    fi && \
-    touch /ojah/logs/admin-auth.log
+    fi
 
-# fail2ban
-COPY build/app/fail2ban/filter.d/ojah.conf /etc/fail2ban/filter.d/ojah.conf
-COPY build/app/fail2ban/jail.local /etc/fail2ban/jail.local
+# cron
+COPY build/crawler/crontab /var/spool/cron/crontabs/root
 
 USER ${HOST_USER_NAME}
 
-CMD ["/ojah/build/app/start.sh"]
+CMD ["/ojah/build/crawler/start.sh"]

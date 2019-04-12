@@ -4,7 +4,13 @@ services:
         restart: always
         environment:
             - DEBUG=0
+    crawler:
+        restart: always
+        environment:
+            - DEBUG=0
     worker_classify:
         restart: always
+        environment:
+            - DEBUG=0
     rabbitmq:
         restart: always

@@ -1,11 +1,14 @@
 deps_app:
 	pip install -r requirements_app.txt
 
-deps_worker_classify:
-	pip install -r requirements_worker_classify.txt
+deps_crawler:
+	pip install -r requirements_crawler.txt
 
 deps_dev:
 	pip install -r requirements_dev.txt
+
+deps_worker_classify:
+	pip install -r requirements_worker_classify.txt
 
 deps_corpora:
 	python -m textblob.download_corpora lite

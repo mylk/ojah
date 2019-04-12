@@ -1,7 +1,6 @@
 #!/bin/sh
 
-# cron
-sudo crond start
+./build/wait-for-rabbitmq.sh
 
 # fail2ban
 sudo rm -f /var/run/fail2ban/* && \

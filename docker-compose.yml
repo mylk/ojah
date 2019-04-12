@@ -20,6 +20,19 @@ services:
             - DEBUG=1
         cap_add:
             - NET_ADMIN
+    crawler:
+        build:
+            context: ./
+            dockerfile: build/crawler/Dockerfile
+            args:
+                - HOST_USER_NAME=mylk
+                - HOST_USER_ID=1000
+                - HOST_GROUP_ID=1000
+        networks:
+            - ojah_net
+        volumes:
+            - ./:/ojah
+        depends_on: [rabbitmq]
     worker_classify:
         build:
             context: ./
