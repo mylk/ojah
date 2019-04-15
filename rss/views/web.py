@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.http import HttpResponse
 from django.template import loader
-from rss.models.newsitem import NewsItem
+from core.models.newsitem import NewsItem
 
 
 def news(request):

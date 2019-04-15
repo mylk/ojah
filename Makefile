@@ -20,7 +20,7 @@ init:
 	./manage.py collectstatic --no-input
 
 analyze:
-	docker-compose run --rm app /bin/sh -c "pylint --load-plugins pylint_django rss/" ; \
+	docker-compose run --rm app /bin/sh -c "pylint --load-plugins=pylint_django --ignore=tests,migrations core/ rss/" ; \
 	docker-compose run --rm app /bin/sh -c "python -m pyt --adaptor Django ."
 	docker-compose kill rabbitmq
 

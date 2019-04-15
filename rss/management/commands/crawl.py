@@ -7,8 +7,8 @@ from django.core import serializers
 import feedparser
 import pika
 
-from rss.models.source import Source
-from rss.models.newsitem import NewsItem
+from core.models.source import Source
+from core.models.newsitem import NewsItem
 
 
 class Command(BaseCommand):

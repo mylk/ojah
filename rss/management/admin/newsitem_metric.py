@@ -4,9 +4,9 @@ from datetime import datetime
 from django.contrib import admin
 from django.conf import settings
 
-from rss.models.newsitem import NewsItem
-from rss.models.newsitem_metric import NewsItemMetric
-from rss.models.corpus import Corpus
+from core.models.newsitem import NewsItem
+from core.models.newsitem_metric import NewsItemMetric
+from core.models.corpus import Corpus
 
 
 class NewsItemMetricAdmin(admin.ModelAdmin):

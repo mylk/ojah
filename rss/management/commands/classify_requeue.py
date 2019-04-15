@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core import serializers
 import pika
 
-from rss.models.newsitem import NewsItem
+from core.models.newsitem import NewsItem
 
 
 class Command(BaseCommand):

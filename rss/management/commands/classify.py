@@ -16,7 +16,7 @@ ConnectionClosed, DuplicateConsumerTag, NoFreeChannels
 from nltk.corpus import stopwords
 from textblob.classifiers import NaiveBayesClassifier
 
-from rss.models.corpus import Corpus
+from core.models.corpus import Corpus
 
 
 class Command(BaseCommand):
