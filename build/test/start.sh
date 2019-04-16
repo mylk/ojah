@@ -2,4 +2,4 @@
 
 make init
 ./build/wait-for-rabbitmq.sh
-./manage.py test core.tests rss.tests
+./manage.py test cli.tests core.tests web.tests

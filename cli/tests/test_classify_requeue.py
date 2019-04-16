@@ -1,9 +1,11 @@
+import mock
+
 from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.test import TestCase
-import mock
-from rss.management.commands import classify_requeue
+
 from core.models.newsitem import NewsItem
+from cli.management.commands import classify_requeue
 
 
 class CommandTestCase(TestCase):
@@ -46,6 +48,7 @@ class CommandTestCase(TestCase):
 
     def test_handle_publishes_when_newsitems_exist(self):
         news_item = NewsItem()
+        news_item.id = 1
         news_item.title = 'foo'
         news_item.save()
 

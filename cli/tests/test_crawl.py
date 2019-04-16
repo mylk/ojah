@@ -1,8 +1,10 @@
-from django.test import TestCase
 import mock
-from rss.management.commands import crawl
+
+from django.test import TestCase
+
 from core.models.newsitem import NewsItem
 from core.models.source import Source
+from cli.management.commands import crawl
 
 
 class CommandTestCase(TestCase):

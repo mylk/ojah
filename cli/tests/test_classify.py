@@ -1,15 +1,15 @@
 import mock
+from pika.exceptions import ChannelClosed, DuplicateConsumerTag, NoFreeChannels
 
 from django.conf import settings
 from django.core import serializers
 from django.core.serializers.base import DeserializationError
 from django.db.utils import DatabaseError
 from django.test import TestCase
-from pika.exceptions import ChannelClosed, DuplicateConsumerTag, NoFreeChannels
 
-from rss.management.commands import classify
 from core.models.corpus import Corpus
 from core.models.newsitem import NewsItem
+from cli.management.commands import classify
 
 
 class CommandTestCase(TestCase):
