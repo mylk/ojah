@@ -9,7 +9,7 @@ from django.test import TestCase
 
 from core.models.corpus import Corpus
 from core.models.newsitem import NewsItem
-from management.commands import classify
+from cli.management.commands import classify
 
 
 class CommandTestCase(TestCase):
