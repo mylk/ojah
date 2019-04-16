@@ -1,9 +1,9 @@
 import logging
+import pika
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.core import serializers
-import pika
 
 from core.models.newsitem import NewsItem
 
@@ -13,7 +13,7 @@ class Command(BaseCommand):
 
     def __init__(self):
         super(Command, self).__init__()
-        self.logger = logging.getLogger('rss')
+        self.logger = logging.getLogger('web')
 
     def handle(self, *args, **options):
         news_items = NewsItem.objects.filter(score=None)

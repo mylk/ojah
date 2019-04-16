@@ -1,9 +1,11 @@
+import mock
+
 from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.test import TestCase
-import mock
-from rss.management.commands import classify_requeue
+
 from core.models.newsitem import NewsItem
+from management.commands import classify_requeue
 
 
 class CommandTestCase(TestCase):

@@ -1,7 +1,7 @@
+import logging
 from random import shuffle
 import re
 import threading
-import logging
 import time
 
 from django.conf import settings
@@ -10,10 +10,10 @@ from django.core.management.base import BaseCommand
 from django.core import serializers
 from django.core.serializers.base import DeserializationError
 from django.db import utils
+from nltk.corpus import stopwords
 import pika
 from pika.exceptions import AMQPChannelError, AMQPConnectionError, ChannelClosed, \
 ConnectionClosed, DuplicateConsumerTag, NoFreeChannels
-from nltk.corpus import stopwords
 from textblob.classifiers import NaiveBayesClassifier
 
 from core.models.corpus import Corpus
@@ -25,7 +25,7 @@ class Command(BaseCommand):
 
     def __init__(self):
         super(Command, self).__init__()
-        self.logger = logging.getLogger('rss')
+        self.logger = logging.getLogger('web')
 
     def handle(self, *args, **options):
         self.logger.info('Training classifier...')
