@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.test import TestCase
 import mock
-from rss.management.admin import newsitem
+from web.management.admin import newsitem
 from core.models.corpus import Corpus
 from core.models.newsitem import NewsItem
 

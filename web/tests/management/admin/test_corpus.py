@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.admin.sites import AdminSite
-from rss.management.admin.corpus import CorpusAdmin
+from web.management.admin.corpus import CorpusAdmin
 from core.models.corpus import Corpus
 from core.models.newsitem import NewsItem
 

@@ -2,7 +2,7 @@ from django.contrib.syndication.views import Feed
 from django.test import TestCase
 from django.utils import timezone
 from core.models.newsitem import NewsItem
-from rss.views.rssfeed import RssFeed
+from web.views.rssfeed import RssFeed
 
 
 class RssFeedTestCase(TestCase):

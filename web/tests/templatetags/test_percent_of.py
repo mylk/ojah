@@ -1,4 +1,4 @@
-from rss.templatetags.percent_of import percent_of
+from web.templatetags.percent_of import percent_of
 import unittest
 
 

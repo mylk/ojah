@@ -1,7 +1,7 @@
 from django.urls import path
-from rss.views import rssfeed
+from web.views import rssfeed
 
-app_name = 'rss'
+app_name = 'web'
 urlpatterns = [
     path('', rssfeed.RssFeed(), name='feed')
 ]

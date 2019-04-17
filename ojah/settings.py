@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core',
-    'rss',
+    'web',
     'rangefilter'
 ]
 
@@ -172,7 +172,7 @@ LOGGING = {
             'propagate': True,
             'level': 'WARN'
         },
-        'rss': {
+        'web': {
             'handlers': ['file_app', 'console'],
             'level': 'INFO'
         },
