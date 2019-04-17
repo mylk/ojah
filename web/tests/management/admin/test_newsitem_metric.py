@@ -6,7 +6,7 @@ from django.contrib.admin.options import ModelAdmin
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.core.handlers.wsgi import WSGIRequest
-from rss.management.admin.newsitem_metric import NewsItemMetricAdmin
+from web.management.admin.newsitem_metric import NewsItemMetricAdmin
 from core.models.corpus import Corpus
 from core.models.newsitem import NewsItem
 from core.models.newsitem_metric import NewsItemMetric

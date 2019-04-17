@@ -5,7 +5,7 @@ import logging
 
 @receiver(user_login_failed)
 def log_failed_login(sender, credentials, request, **kwargs):
-    logger_app = logging.getLogger('rss')
+    logger_app = logging.getLogger('web')
     logger_auth = logging.getLogger('admin_auth')
 
     remote_address_fields = [

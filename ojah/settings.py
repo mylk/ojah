@@ -173,7 +173,7 @@ LOGGING = {
             'propagate': True,
             'level': 'WARN'
         },
-        'rss': {
+        'web': {
             'handlers': ['file_app', 'console'],
             'level': 'INFO'
         },

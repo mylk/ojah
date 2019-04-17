@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.test.client import RequestFactory
 from django.urls import reverse
 import mock
-from rss.receivers.admin import login
+from web.receivers.admin import login
 
 
 class LoginTestCase(TestCase):

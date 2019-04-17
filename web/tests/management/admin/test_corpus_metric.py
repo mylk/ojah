@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.test.client import RequestFactory
 from django.contrib.auth.models import User
 from django.contrib.admin.sites import AdminSite
-from rss.management.admin.corpus_metric import CorpusMetricAdmin
+from web.management.admin.corpus_metric import CorpusMetricAdmin
 from core.models.corpus import Corpus
 from core.models.corpus_metric import CorpusMetric
 from core.models.newsitem import NewsItem

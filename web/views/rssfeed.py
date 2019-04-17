@@ -10,7 +10,7 @@ class RssFeed(Feed):
 
     title = settings.RSS_FEED_TITLE
     description = settings.RSS_FEED_DESCRIPTION
-    link = reverse_lazy('rss:feed')
+    link = reverse_lazy('web:feed')
 
     @staticmethod
     def items():

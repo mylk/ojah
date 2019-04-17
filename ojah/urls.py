@@ -16,12 +16,12 @@ Including another URLconf
 from django.urls import include, path, re_path
 from django.contrib import admin
 from django.conf import settings
-from rss.views import web
+from web.views import web
 
 urlpatterns = [
     re_path(r'^admin/', admin.site.urls),
     re_path(r'^news/', web.news),
-    re_path(r'^rss/', include('rss.urls')),
+    re_path(r'^rss/', include('web.urls')),
 
 ]
 
