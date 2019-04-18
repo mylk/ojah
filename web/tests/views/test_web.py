@@ -8,7 +8,7 @@ class WebTestCase(TestCase):
 
     def get(self):
         headers = { 'user_agent': 'test-browser' }
-        response = self.client.get('/news/', **headers)
+        response = self.client.get('/web/', **headers)
         return response
 
     def test_news_returns_http_response_with_empty_template_when_no_newsitems_exist(self):
