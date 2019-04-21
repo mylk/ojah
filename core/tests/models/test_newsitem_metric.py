@@ -180,3 +180,97 @@ class NewsItemMetricTestCase(TestCase):
         self.assertEquals(0, metrics[0]['accuracy'])
         self.assertEquals('2018-11-25', metrics[1]['added_at'])
         self.assertEquals(100, metrics[1]['accuracy'])
+
+    def test_get_accuracy_total_returns_100_percent_when_no_newsitems_at_all(self):
+        metrics = self.newsitem_metric.get_accuracy_total(self.date_range)
+        self.assertEquals(100.0, metrics)
+
+    def test_get_accuracy_total_does_not_include_unclassified_newsitems(self):
+        news_item = NewsItem()
+        news_item.score = None
+        news_item.added_at = '2018-11-24 01:00:00+00:00'
+        news_item.save()
+
+        news_item = NewsItem()
+        news_item.score = None
+        news_item.published = True
+        news_item.added_at = '2018-11-24 02:00:00+00:00'
+        news_item.save()
+
+        accuracy = self.newsitem_metric.get_accuracy_total(self.date_range)
+        self.assertEquals(100.0, accuracy)
+
+    def test_get_accuracy_total_returns_100_percent_when_no_newsitems_between_range(self):
+        news_item = NewsItem()
+        news_item.score = 1
+        news_item.added_at = '2018-11-23 01:00:00+00:00'
+        news_item.save()
+
+        news_item = NewsItem()
+        news_item.score = 1
+        news_item.added_at = '2018-11-26 01:00:00+00:00'
+        news_item.save()
+
+        accuracy = self.newsitem_metric.get_accuracy_total(self.date_range)
+        self.assertEquals(100.0, accuracy)
+
+    def test_get_accuracy_total_returns_100_percent_when_no_corpora(self):
+        news_item = NewsItem()
+        news_item.score = 1
+        news_item.added_at = '2018-11-24 01:00:00+00:00'
+        news_item.save()
+
+        accuracy = self.newsitem_metric.get_accuracy_total(self.date_range)
+        self.assertEquals(100, accuracy)
+
+    def test_get_accuracy_total_returns_50_percent_when_one_accurate_newsitem_and_one_not_accurate(self):
+        news_item = NewsItem()
+        news_item.score = 1
+        news_item.added_at = '2018-11-24 01:00:00+00:00'
+        news_item.save()
+
+        corpus = Corpus()
+        corpus.news_item = news_item
+        corpus.positive = False
+        corpus.save()
+
+        news_item = NewsItem()
+        news_item.score = 1
+        news_item.added_at = '2018-11-24 02:00:00+00:00'
+        news_item.save()
+
+        accuracy = self.newsitem_metric.get_accuracy_total(self.date_range)
+        self.assertEquals(50.0, accuracy)
+
+    def test_get_accuracy_total_returns_0_percent_when_only_not_accurate_newsitems_exist(self):
+        news_item = NewsItem()
+        news_item.score = 1
+        news_item.added_at = '2018-11-24 01:00:00+00:00'
+        news_item.save()
+
+        corpus = Corpus()
+        corpus.news_item = news_item
+        corpus.positive = False
+        corpus.save()
+
+        accuracy = self.newsitem_metric.get_accuracy_total(self.date_range)
+        self.assertEquals(0.0, accuracy)
+
+    def test_get_accuracy_total_uses_two_day_statistics_when_exist(self):
+        news_item = NewsItem()
+        news_item.score = 1
+        news_item.added_at = '2018-11-24 01:00:00+00:00'
+        news_item.save()
+
+        corpus = Corpus()
+        corpus.news_item = news_item
+        corpus.positive = False
+        corpus.save()
+
+        news_item = NewsItem()
+        news_item.score = 1
+        news_item.added_at = '2018-11-25 01:00:00+00:00'
+        news_item.save()
+
+        accuracy = self.newsitem_metric.get_accuracy_total(self.date_range)
+        self.assertEquals(50.0, accuracy)
