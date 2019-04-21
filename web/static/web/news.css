@@ -35,8 +35,17 @@ a:visited {
     padding-bottom: 10px;
 }
 
-#content .news-item {
+#content .news-item,
+#content .text {
     margin: 10px 10px 10px 20px;
+}
+
+#content .text {
+    color: #000000;
+}
+
+#content .text a {
+    text-decoration: underline;
 }
 
 #ruler {

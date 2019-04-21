@@ -25,6 +25,7 @@ urlpatterns = [
     re_path(r'^rss/', include('web.urls')),
     re_path(r'^web/', web.news),
     re_path(r'^news/', RedirectView.as_view(url='/web/')),
+    re_path(r'^about/', web.about)
 
 ]
 

@@ -1,0 +1,17 @@
+{% extends 'web/base.html' %}
+{% block content %}
+    <div class="text">
+        Ojah! is a news aggregator that filters out the news to give you only those that are positive!<br/>
+        A list of RSS feeds is provided to the application. The application crawls the feeds every now and then,<br/>
+        stores the news and then scores them by performing sentiment analysis on their title.<br/><br/>
+
+        Let me share some simple stats:<br/><br/>
+
+        <strong>Sources crawled</strong>: {{ sources_count }}<br/>
+        <strong>News classified</strong>: {{ news_items_count }}<br/>
+        <strong>Corpora created</strong>: {{ corpora_count }}<br/>
+        <strong>Classification accuracy</strong>: {{ accuracy_total }}<br/><br/>
+
+        For the technical information refer to the <a href="https://github.com/mylk/ojah/blob/master/README.md#technical-information">README file</a>.
+    </div>
+{% endblock %}

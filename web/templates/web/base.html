@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="referrer" content="origin">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'web/news.css' %}">
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="//ojah.io/rss">
+    <title>Ojah!</title>
+</head>
+<body>
+    <div id="header">
+        <b class="hnname">Ojah!</b>
+        <a href="/web/">news</a>
+        | <a href="/rss/">rss</a>
+        | <a href="/about/">about</a>
+        | <a href="https://github.com/mylk/ojah" target="_blank">source</a>
+        | <a href="mailto:milonas.ko@gmail.com">contact</a>
+    </div>
+    <div id="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+    <div id="ruler"></div>
+    <div id="footer">
+        <div class="links">
+            <a href="/web/">news</a>
+            | <a href="/rss/">rss</a>
+            | <a href="/about/">about</a>
+            | <a href="https://github.com/mylk/ojah" target="_blank">source</a>
+            | <a href="mailto:milonas.ko@gmail.com">contact</a>
+        </div>
+    </div>
+</body>
+</html>
