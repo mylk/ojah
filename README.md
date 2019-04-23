@@ -5,8 +5,8 @@
 ## How it works
 
 A list of RSS feeds is provided to the application. The application crawls the feeds every now and then, stores the news
-and then scores them by performing sentiment analysis on their title. Finally you have to subscribe to the RSS feed of
-`Ojah!` to get your positive news!
+and then scores them by performing sentiment analysis on their title. Finally, you have to visit the web page of `Ojah!`
+or subscribe to the RSS feed to get your positive news!
 
 
 ## Technical information
@@ -22,7 +22,7 @@ Currently the components are three:
 - crawler
 - classifier
 
-The first two, are placed on the same container, without any particular reason, but it would be more legit to get separated.
+Each one is placed on a separate Docker container, in case more than one instance is required for any of them.
 
 ### Sentiment analysis
 
@@ -41,16 +41,17 @@ period of time to find the most accurate between:
 The most accurate was "NaiveBayesClassifier" which I finally kept.
 
 ### Corpora
-I initially used the twitter corpora provided by the `nltk` module. Then I used only the corpora produced
-by `Ojah!` to improve the accuracy of the sentiment classification.
 
-Custom corpora can be added by the administration dashboard of `Ojah!` where we can change the classification
+I initially used the Twitter corpora provided by the `nltk` module. Then I used only the corpora produced
+by `Ojah!` to improve the accuracy of the classification.
+
+Custom corpora can be added using the administration dashboard of `Ojah!` where we can change the classification
 of a news item and use it as a corpus, in order to make `Ojah!` learn from its mistakes.
 
 ### Used database
 
-Currently, as used in "production" right now, there is no need to scale any of the components (app, crawler, classifier),
-so an embedded database is used, SQLite3.
+In the production environment, as currenty there is no need to scale any of the components (app, crawler, classifier),
+an embedded database is used, SQLite3. In the near future a migration to MySQL while be performed.
 
 ## Use the application
 
@@ -67,8 +68,9 @@ So, you are a traditional type of guy. For this installation you should:
 
 ```
 make deps_app
-make deps_worker_classify
 make deps_corpora
+make deps_crawler
+make deps_worker_classify
 ```
 
 - Setup the database, the initial data and static files:
@@ -100,10 +102,10 @@ make init
 So you love containers like me. Things are really simple here, you can have everything being ran
 with a couple of commands:
 
-- Build the images:
+- Build the images (will take a few minutes for the first build):
 
 ```
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml build
 ```
 
 - Start the containers:
@@ -129,7 +131,7 @@ http://127.0.0.1:8000/rss
 - There is also a web interface (clone of [Hacker news](https://news.ycombinator.com/)) to see the news from your web browser:
 
 ```
-http://127.0.0.1:8000/news
+http://127.0.0.1:8000/web
 ```
 
 The administration dashboard has a few more cool things, like statistics and a simple graph for classification accuracy.
@@ -144,12 +146,20 @@ make deps_dev
 ```
 
 In case you are hacking using the containers, replace "docker-compose.prod.yml" with "docker-compose.dev.yml"
-in the above commands.
+in the above commands to include debugging, testing and linting tools.
 
 Also, irrelevant to the environment you run the application (your host or containers), you can run the tests by running:
+
 
 ```
 make test
 ```
 
-This will run the tests in the related containers of each application component.
+This will run the tests in a separate "test" container.
+
+
+You can also run a linting process:
+
+```
+make analyze
+```
