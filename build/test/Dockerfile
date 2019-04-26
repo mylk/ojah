@@ -13,7 +13,7 @@ RUN apk add make curl gcc libc-dev linux-headers && \
     make deps_dev && \
     make deps_app && \
     make deps_crawler && \
-    make deps_worker_classify
+    make deps_classifier
 
 USER ${HOST_USER_NAME}
 

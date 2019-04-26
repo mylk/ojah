@@ -33,10 +33,10 @@ services:
         volumes:
             - ./:/ojah
         depends_on: [rabbitmq]
-    worker_classify:
+    classifier:
         build:
             context: ./
-            dockerfile: build/worker_classify/Dockerfile
+            dockerfile: build/classifier/Dockerfile
             args:
                 - HOST_USER_NAME=mylk
                 - HOST_USER_ID=1000

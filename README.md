@@ -70,7 +70,7 @@ So, you are a traditional type of guy. For this installation you should:
 make deps_app
 make deps_corpora
 make deps_crawler
-make deps_worker_classify
+make deps_classifier
 ```
 
 - Setup the database, the initial data and static files:
