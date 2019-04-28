@@ -5,6 +5,7 @@
 
 web/staticfiles/*
 logs/*
+db/*
 
 *.pyc
 __pycache__
@@ -12,4 +13,5 @@ db.sqlite3
 
 !web/staticfiles/.gitkeep
 !logs/.gitkeep
+!db/.gitkeep
 

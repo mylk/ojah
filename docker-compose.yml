@@ -1,6 +1,19 @@
 version: "3.7"
+
+x-base: &base
+    depends_on: [mariadb, rabbitmq]
+    env_file:
+        - './build/mariadb.env'
+    environment:
+        - DEBUG=0
+    networks:
+        - ojah_net
+    volumes:
+        - ./:/ojah
+
 services:
     app:
+        <<: *base
         build:
             context: ./
             dockerfile: build/app/Dockerfile
@@ -11,42 +24,35 @@ services:
                 - HOST_GROUP_ID=1000
         ports:
             - "8000:8000"
-        networks:
-            - ojah_net
-        volumes:
-            - ./:/ojah
-        depends_on: [rabbitmq]
         environment:
             - DEBUG=1
         cap_add:
             - NET_ADMIN
+
     crawler:
+        <<: *base
         build:
             context: ./
             dockerfile: build/crawler/Dockerfile
             args:
+                - DEBUG=0
                 - HOST_USER_NAME=mylk
                 - HOST_USER_ID=1000
                 - HOST_GROUP_ID=1000
-        networks:
-            - ojah_net
-        volumes:
-            - ./:/ojah
-        depends_on: [rabbitmq]
+
     worker_classify:
+        <<: *base
         build:
             context: ./
             dockerfile: build/worker_classify/Dockerfile
             args:
+                - DEBUG=0
                 - HOST_USER_NAME=mylk
                 - HOST_USER_ID=1000
                 - HOST_GROUP_ID=1000
-        networks:
-            - ojah_net
-        volumes:
-            - ./:/ojah
-        depends_on: [rabbitmq]
+
     test:
+        <<: *base
         build:
             context: ./
             dockerfile: build/test/Dockerfile
@@ -54,15 +60,26 @@ services:
                 - HOST_USER_NAME=mylk
                 - HOST_USER_ID=1000
                 - HOST_GROUP_ID=1000
-        networks:
-            - ojah_net
-        volumes:
-            - ./:/ojah
-        depends_on: [rabbitmq]
+
     rabbitmq:
         image: rabbitmq:3-management
         networks:
             - ojah_net
+
+    mariadb:
+        <<: *base
+        build:
+            context: ./
+            dockerfile: build/mariadb/Dockerfile
+            args:
+                - HOST_USER_NAME=mylk
+                - HOST_USER_ID=1000
+                - HOST_GROUP_ID=1000
+        depends_on: []
+        volumes:
+            - ./db/data:/var/lib/mysql
+            - ./db/init:/docker-entrypoint-initdb.d/:ro
+
 networks:
     ojah_net:
         driver: "bridge"

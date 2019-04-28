@@ -110,11 +110,11 @@ class CorpusMetricAdminTestCase(TestCase):
 
         expected_metrics = [
             {
-                'positive': False,
+                'positive': True,
                 'total': 1
             },
             {
-                'positive': True,
+                'positive': False,
                 'total': 1
             }
         ]

@@ -36,12 +36,14 @@ def about(request):
             now.year, int(now.month), int(now.day)
         )
     })
+    accuracy_total = '{}%'.format(round(accuracy_total)) if accuracy_total else '-'
+
     news_items_count = NewsItem.objects.all().count()
     corpora_count = Corpus.objects.all().count()
     sources_count = Source.objects.all().count()
 
     context = {
-        'accuracy_total': '{}%'.format(round(accuracy_total)),
+        'accuracy_total': accuracy_total,
         'news_items_count': news_items_count,
         'corpora_count': corpora_count,
         'sources_count': sources_count
