@@ -21,12 +21,12 @@ class NewsItemMetric(NewsItem):
         with connection.cursor() as cursor:
             cursor.execute('''
                 SELECT (
-                    100 - PRINTF("%%.2f", errors.error)
+                    100 - ROUND(errors.error, 2)
                 ) AS accuracy,
                 added_at
                 FROM (
                     SELECT (
-                        (CAST(counts.corpus_count AS FLOAT) / CAST(counts.news_count AS FLOAT)) * 100
+                        (counts.corpus_count / counts.news_count) * 100
                     ) AS error,
                     added_at
                     FROM (
@@ -35,7 +35,7 @@ class NewsItemMetric(NewsItem):
                         COUNT(news_and_corpora.corpus_id) AS corpus_count,
                         added_at
                         FROM (
-                            SELECT ni.id AS news_item_id, c.id AS corpus_id, DATE(ni.added_at) AS added_at
+                            SELECT ni.id AS news_item_id, c.id AS corpus_id, DATE_FORMAT(ni.added_at, "%%Y-%%m-%%d") AS added_at
                             FROM news_item AS ni
                             LEFT JOIN corpus AS c ON c.news_item_id = ni.id
                             WHERE ni.added_at BETWEEN %s AND %s
@@ -52,11 +52,11 @@ class NewsItemMetric(NewsItem):
         with connection.cursor() as cursor:
             cursor.execute('''
                 SELECT (
-                    100 - PRINTF("%%.2f", errors.error)
+                    100 - ROUND(errors.error, 2)
                 ) AS accuracy
                 FROM (
                     SELECT (
-                        (CAST(counts.corpus_count AS FLOAT) / CAST(counts.news_count AS FLOAT)) * 100
+                        (counts.corpus_count / counts.news_count) * 100
                     ) AS error
                     FROM (
                         SELECT

@@ -33,6 +33,7 @@ class NewsItemMetricTestCase(TestCase):
         source.save()
 
         news_item = NewsItem()
+        news_item.id = 1
         news_item.title = 'foo'
         news_item.description = 'bar'
         news_item.url = 'https://www.google.com'
@@ -181,9 +182,9 @@ class NewsItemMetricTestCase(TestCase):
         self.assertEquals('2018-11-25', metrics[1]['added_at'])
         self.assertEquals(100, metrics[1]['accuracy'])
 
-    def test_get_accuracy_total_returns_100_percent_when_no_newsitems_at_all(self):
+    def test_get_accuracy_total_returns_none_when_no_newsitems_at_all(self):
         metrics = self.newsitem_metric.get_accuracy_total(self.date_range)
-        self.assertEquals(100.0, metrics)
+        self.assertEquals(None, metrics)
 
     def test_get_accuracy_total_does_not_include_unclassified_newsitems(self):
         news_item = NewsItem()
@@ -198,9 +199,9 @@ class NewsItemMetricTestCase(TestCase):
         news_item.save()
 
         accuracy = self.newsitem_metric.get_accuracy_total(self.date_range)
-        self.assertEquals(100.0, accuracy)
+        self.assertEquals(None, accuracy)
 
-    def test_get_accuracy_total_returns_100_percent_when_no_newsitems_between_range(self):
+    def test_get_accuracy_total_returns_none_when_no_newsitems_between_range(self):
         news_item = NewsItem()
         news_item.score = 1
         news_item.added_at = '2018-11-23 01:00:00+00:00'
@@ -212,7 +213,7 @@ class NewsItemMetricTestCase(TestCase):
         news_item.save()
 
         accuracy = self.newsitem_metric.get_accuracy_total(self.date_range)
-        self.assertEquals(100.0, accuracy)
+        self.assertEquals(None, accuracy)
 
     def test_get_accuracy_total_returns_100_percent_when_no_corpora(self):
         news_item = NewsItem()

@@ -50,8 +50,8 @@ of a news item and use it as a corpus, in order to make `Ojah!` learn from its m
 
 ### Used database
 
-In the production environment, as currenty there is no need to scale any of the components (app, crawler, classifier),
-an embedded database is used, SQLite3. In the near future a migration to MySQL while be performed.
+Previously an embedded database was used (SQLite3), but for the case of the need to scale any of the components
+(app, crawler, classifier), a migration to MySQL was performed.
 
 ## Use the application
 
