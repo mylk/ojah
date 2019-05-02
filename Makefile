@@ -7,8 +7,8 @@ deps_crawler:
 deps_dev:
 	pip install -r requirements_dev.txt
 
-deps_worker_classify:
-	pip install -r requirements_worker_classify.txt
+deps_classifier:
+	pip install -r requirements_classifier.txt
 
 deps_corpora:
 	python -m textblob.download_corpora lite
