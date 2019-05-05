@@ -373,7 +373,7 @@ class CommandTestCase(TestCase):
         # un-acknowledged the item got from the queue
         channel.basic_nack.assert_called_once()
         # error was logged
-        self.logger.error.assert_called_once_with('Classifier could acknowledge item due to "%s"', 'foo')
+        self.logger.error.assert_called_once_with('Classifier could not acknowledge item due to "%s"', 'foo')
 
     def test_classify_callback_classifies_negative_queue_item_and_saves_on_database(self):
         # make it look like there is a trained classifier that will return a negative class

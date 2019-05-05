@@ -133,7 +133,7 @@ class Command(BaseCommand):
                     ConnectionClosed, NoFreeChannels
             ) as ex_ack:
                 self.reject_queue_item(channel, method)
-                self.logger.error('Classifier could acknowledge item due to "%s"', str(ex_ack))
+                self.logger.error('Classifier could not acknowledge item due to "%s"', str(ex_ack))
                 return
 
             self.logger.info(
