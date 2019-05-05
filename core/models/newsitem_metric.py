@@ -21,12 +21,12 @@ class NewsItemMetric(NewsItem):
         with connection.cursor() as cursor:
             cursor.execute('''
                 SELECT (
-                    100 - FORMAT(errors.error, 2)
+                    100 - ROUND(errors.error, 2)
                 ) AS accuracy,
                 added_at
                 FROM (
                     SELECT (
-                        (CAST(counts.corpus_count AS DECIMAL(5, 2)) / CAST(counts.news_count AS DECIMAL(5, 2))) * 100
+                        (counts.corpus_count / counts.news_count) * 100
                     ) AS error,
                     added_at
                     FROM (
@@ -52,11 +52,11 @@ class NewsItemMetric(NewsItem):
         with connection.cursor() as cursor:
             cursor.execute('''
                 SELECT (
-                    100 - FORMAT(errors.error, 2)
+                    100 - ROUND(errors.error, 2)
                 ) AS accuracy
                 FROM (
                     SELECT (
-                        (CAST(counts.corpus_count AS DECIMAL(5, 2)) / CAST(counts.news_count AS DECIMAL(5, 2))) * 100
+                        (counts.corpus_count / counts.news_count) * 100
                     ) AS error
                     FROM (
                         SELECT
