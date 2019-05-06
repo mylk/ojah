@@ -22,6 +22,7 @@ class CommandTestCase(TestCase):
     channel = None
     logger = None
     serialized_news_item = None
+    db_connection = None
 
     def setUp(self):
         # retain the original imported packages
@@ -40,6 +41,9 @@ class CommandTestCase(TestCase):
         self.connection.channel = mock.MagicMock(return_value=self.channel)
         # mock ConnectionParameters
         classify.pika.ConnectionParameters = mock.MagicMock()
+        # mock the ORM connection
+        self.db_connection = mock.MagicMock()
+        classify.connection = self.db_connection
 
         # mock the classifier
         classify.NaiveBayesClassifier = mock.MagicMock()
@@ -103,29 +107,29 @@ class CommandTestCase(TestCase):
         channel.start_consuming = mock.MagicMock(side_effect=ChannelClosed('foo'))
         self.command.get_consumer = mock.MagicMock(return_value=channel)
         # mock the callback called when a message is consumed from the queue
-        self.command.classify_callback = mock.MagicMock()
+        self.command.classify_decorator = mock.MagicMock()
 
         # call the method being tested
         self.command.classify_consumer()
 
         # the queue consumer was tried to get fetched
-        self.command.get_consumer.assert_called_once_with(settings.QUEUE_NAME_CLASSIFY, self.command.classify_callback)
+        self.command.get_consumer.assert_called_once_with(settings.QUEUE_NAME_CLASSIFY, self.command.classify_decorator)
         # consuming messages from queue was started
         channel.start_consuming.assert_called_once()
         # error was logged
         self.logger.error.assert_any_call('foo')
 
-    def test_classify_consumer_consumes_the_classify_queue_with_the_classify_callback(self):
+    def test_classify_consumer_consumes_the_classify_queue_with_the_classify_decorator(self):
         # mock channel and the method to get a consumer
         channel = mock.MagicMock()
         self.command.get_consumer = mock.MagicMock(return_value=channel)
-        self.command.classify_callback = mock.MagicMock()
+        self.command.classify_decorator = mock.MagicMock()
 
         # call the method being tested
         self.command.classify_consumer()
 
         # the queue consumer was tried to get fetched
-        self.command.get_consumer.assert_called_once_with(settings.QUEUE_NAME_CLASSIFY, self.command.classify_callback)
+        self.command.get_consumer.assert_called_once_with(settings.QUEUE_NAME_CLASSIFY, self.command.classify_decorator)
         # consuming messages from queue was started
         channel.start_consuming.assert_called_once()
         # no error was logged
@@ -169,10 +173,10 @@ class CommandTestCase(TestCase):
         # mock queue consume method and force it to raise an exception
         self.channel.basic_consume = mock.MagicMock(side_effect=DuplicateConsumerTag('foo'))
         # just create a fake method to be used as a callback parameter
-        classify_callback = mock.MagicMock()
+        classify_decorator = mock.MagicMock()
 
         # call the method being tested
-        channel = self.command.get_consumer(settings.QUEUE_NAME_CLASSIFY, classify_callback)
+        channel = self.command.get_consumer(settings.QUEUE_NAME_CLASSIFY, classify_decorator)
 
         # the connection parameters are set correctly
         classify.pika.ConnectionParameters.assert_called_once_with(host=settings.QUEUE_HOSTNAME, heartbeat_interval=600, blocked_connection_timeout=300)
@@ -183,15 +187,15 @@ class CommandTestCase(TestCase):
 
     def test_get_consumer_returns_channel_to_consume_the_classify_queue(self):
         # just create a fake method to be used as a callback parameter
-        classify_callback = mock.MagicMock()
+        classify_decorator = mock.MagicMock()
 
         # call the method being tested
-        channel = self.command.get_consumer(settings.QUEUE_NAME_CLASSIFY, classify_callback)
+        channel = self.command.get_consumer(settings.QUEUE_NAME_CLASSIFY, classify_decorator)
 
         # the connection parameters are set correctly
         classify.pika.ConnectionParameters.assert_called_once_with(host=settings.QUEUE_HOSTNAME, heartbeat_interval=600, blocked_connection_timeout=300)
         # the queue consume method was called
-        self.channel.basic_consume.assert_called_once_with(classify_callback, queue=settings.QUEUE_NAME_CLASSIFY)
+        self.channel.basic_consume.assert_called_once_with(classify_decorator, queue=settings.QUEUE_NAME_CLASSIFY)
         # no error was logged
         self.logger.error.assert_not_called()
         # a broker channel is returned
@@ -303,6 +307,24 @@ class CommandTestCase(TestCase):
 
         # shuffled the corpora with only one of the identical corpora
         classify.shuffle.assert_called_once_with([('foo bar', 'pos')])
+
+    def test_classify_decorator_closes_connection(self):
+        # mock the consumer callback parameters
+        channel = mock.MagicMock()
+        method = mock.MagicMock()
+        properties = mock.MagicMock()
+        body = mock.MagicMock()
+
+        # mock the callback called when a message is consumed from the queue
+        self.command.classify_callback = mock.MagicMock()
+
+        # call the method being tested
+        self.command.classify_decorator(channel, method, properties, body)
+
+        # the callback is called
+        self.command.classify_callback.assert_called_once_with(channel, method, properties, body)
+        # connection gets closed after calling the callback
+        self.db_connection.close.assert_called_once()
 
     def test_classify_callback_waits_for_classifier_when_no_trained_classifier_exists(self):
         # mock the time module

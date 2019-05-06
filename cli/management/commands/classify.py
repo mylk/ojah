@@ -9,7 +9,7 @@ from django.core.exceptions import FieldDoesNotExist, FieldError, ValidationErro
 from django.core.management.base import BaseCommand
 from django.core import serializers
 from django.core.serializers.base import DeserializationError
-from django.db import utils
+from django.db import utils, connection
 from nltk.corpus import stopwords
 import pika
 from pika.exceptions import AMQPChannelError, AMQPConnectionError, ChannelClosed, \
@@ -45,7 +45,7 @@ class Command(BaseCommand):
         thread_train.start()
 
     def classify_consumer(self):
-        channel = self.get_consumer(settings.QUEUE_NAME_CLASSIFY, self.classify_callback)
+        channel = self.get_consumer(settings.QUEUE_NAME_CLASSIFY, self.classify_decorator)
         try:
             channel.start_consuming()
         except (
@@ -95,6 +95,11 @@ class Command(BaseCommand):
         shuffle(corpora_classified)
 
         return NaiveBayesClassifier(corpora_classified)
+
+    def classify_decorator(self, channel, method, properties, body):
+        self.classify_callback(channel, method, properties, body)
+        connection.close()
+        return
 
     def classify_callback(self, channel, method, properties, body):
         if self.classifier:
