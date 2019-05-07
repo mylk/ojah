@@ -22,6 +22,7 @@ services:
                 - HOST_USER_NAME=mylk
                 - HOST_USER_ID=1000
                 - HOST_GROUP_ID=1000
+        hostname: app
         ports:
             - "8000:8000"
         environment:
@@ -39,6 +40,7 @@ services:
                 - HOST_USER_NAME=mylk
                 - HOST_USER_ID=1000
                 - HOST_GROUP_ID=1000
+        hostname: crawler
 
     classifier:
         <<: *base
@@ -50,6 +52,7 @@ services:
                 - HOST_USER_NAME=mylk
                 - HOST_USER_ID=1000
                 - HOST_GROUP_ID=1000
+        hostname: classifier
 
     test:
         <<: *base
@@ -60,9 +63,11 @@ services:
                 - HOST_USER_NAME=mylk
                 - HOST_USER_ID=1000
                 - HOST_GROUP_ID=1000
+        hostname: test
 
     rabbitmq:
         image: rabbitmq:3-management
+        hostname: rabbitmq
         networks:
             - ojah_net
 
@@ -75,6 +80,7 @@ services:
                 - HOST_USER_NAME=mylk
                 - HOST_USER_ID=1000
                 - HOST_GROUP_ID=1000
+        hostname: mariadb
         depends_on: []
         volumes:
             - ./db/data:/var/lib/mysql
