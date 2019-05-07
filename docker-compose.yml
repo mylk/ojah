@@ -83,8 +83,8 @@ services:
         hostname: mariadb
         depends_on: []
         volumes:
-            - ./db/data:/var/lib/mysql
-            - ./db/init:/docker-entrypoint-initdb.d/:ro
+            - ./data/mariadb/data:/var/lib/mysql
+            - ./data/mariadb/init:/docker-entrypoint-initdb.d/:ro
 
 networks:
     ojah_net:
