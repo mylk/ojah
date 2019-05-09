@@ -6,6 +6,7 @@
 web/staticfiles/*
 logs/*
 data/mariadb/data/*
+data/rabbitmq/mnesia/*
 
 *.pyc
 __pycache__
@@ -14,3 +15,4 @@ db.sqlite3
 !web/staticfiles/.gitkeep
 !logs/.gitkeep
 !data/mariadb/data/.gitkeep
+!data/rabbitmq/mnesia/.gitkeep

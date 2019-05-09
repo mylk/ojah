@@ -66,10 +66,18 @@ services:
         hostname: test
 
     rabbitmq:
-        image: rabbitmq:3-management
+        <<: *base
+        build:
+            context: ./
+            dockerfile: build/rabbitmq/Dockerfile
+            args:
+                - HOST_USER_NAME=mylk
+                - HOST_USER_ID=1000
+                - HOST_GROUP_ID=1000
         hostname: rabbitmq
-        networks:
-            - ojah_net
+        depends_on: []
+        volumes:
+            - ./data/rabbitmq/mnesia:/var/lib/rabbitmq/mnesia/
 
     mariadb:
         <<: *base
