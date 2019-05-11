@@ -1,5 +1,7 @@
+from datetime import datetime
 import mock
 
+from django.utils import timezone
 from django.test import TestCase
 
 from core.models.newsitem import NewsItem
@@ -9,7 +11,6 @@ from cli.management.commands import crawl
 
 class CommandTestCase(TestCase):
 
-    crawl = None
     feed = {
         'entries': [
             {
@@ -28,6 +29,7 @@ class CommandTestCase(TestCase):
         crawl.NewsItem.exists_real = crawl.NewsItem.exists
         crawl.NewsItem.save_real = crawl.NewsItem.save
         crawl.Source.crawled_real = crawl.Source.crawled
+        crawl.Source.crawling_real = crawl.Source.crawling
         crawl.serializers.serialize_real = crawl.serializers.serialize
         crawl.feedparser.parse_real = crawl.feedparser.parse
 
@@ -48,6 +50,7 @@ class CommandTestCase(TestCase):
         crawl.NewsItem.exists = mock.MagicMock()
         crawl.NewsItem.save = mock.MagicMock()
         crawl.Source.crawled = mock.MagicMock()
+        crawl.Source.crawling = mock.MagicMock()
 
         # mock the serializer that serializes models
         crawl.serializers.serialize = mock.MagicMock()
@@ -63,6 +66,7 @@ class CommandTestCase(TestCase):
         crawl.NewsItem.exists = crawl.NewsItem.exists_real
         crawl.NewsItem.save = crawl.NewsItem.save_real
         crawl.Source.crawled = crawl.Source.crawled_real
+        crawl.Source.crawling = crawl.Source.crawling_real
         crawl.serializers.serialize = crawl.serializers.serialize_real
         crawl.feedparser.parse = crawl.feedparser.parse_real
 
@@ -166,6 +170,36 @@ class CommandTestCase(TestCase):
         self.channel.queue_declare.assert_called_once()
         # crawl was called one for each source existing
         self.assertEquals(2, self.command.crawl.call_count)
+
+    def test_handle_exits_when_source_is_pending_but_not_stale(self):
+        source = Source()
+        source.name = 'foo'
+        source.pending = True
+        source.last_crawl = timezone.now()
+        source.save()
+
+        self.command.crawl = mock.MagicMock()
+
+        # the method being tested
+        self.command.handle(name='foo')
+
+        # actual crawl not called
+        self.command.crawl.assert_not_called()
+
+    def test_handle_crawls_when_source_is_pending_and_stale(self):
+        source = Source()
+        source.name = 'foo'
+        source.pending = True
+        source.last_crawl = datetime.strptime('2018-05-11 01:00:00+00:00', '%Y-%m-%d %H:%M:%S%z')
+        source.save()
+
+        self.command.crawl = mock.MagicMock()
+
+        # the method being tested
+        self.command.handle(name='foo')
+
+        # actual crawl was called
+        self.command.crawl.assert_called_once()
 
     def test_crawl_exits_when_feed_parse_fails(self):
         # make the parser raise an exception
@@ -295,5 +329,7 @@ class CommandTestCase(TestCase):
         # the feed entry was saved and enqueued for classification
         crawl.NewsItem.save.assert_called_once()
         self.channel.basic_publish.assert_called_once()
+        # the source was marked as pending for crawl
+        crawl.Source.crawling.assert_called_once()
         # the source is marked as crawled
         crawl.Source.crawled.assert_called_once()

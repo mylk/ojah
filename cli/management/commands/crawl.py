@@ -41,9 +41,12 @@ class Command(BaseCommand):
         channel.queue_declare(queue=settings.QUEUE_NAME_CLASSIFY, durable=True)
 
         for source in sources:
-            self.crawl(source, channel)
+            if not source.pending or source.is_stale():
+                self.crawl(source, channel)
 
     def crawl(self, source, channel):
+        source.crawling()
+
         self.logger.info('Crawling \'%s\'...', source.name)
 
         try:
