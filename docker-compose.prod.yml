@@ -4,13 +4,19 @@ services:
         restart: always
         environment:
             - DEBUG=0
+
     crawler:
         restart: always
         environment:
             - DEBUG=0
+
     classifier:
         restart: always
         environment:
             - DEBUG=0
+
+    mariadb:
+        restart: always
+
     rabbitmq:
         restart: always
