@@ -17,4 +17,4 @@ COPY build/rabbitmq/rabbitmq.conf /etc/rabbitmq/rabbitmq.conf
 
 USER ${HOST_USER_NAME}
 
-CMD ["sudo", "/usr/lib/rabbitmq/bin/rabbitmq-server"]
+CMD ["sudo", "/opt/rabbitmq/sbin/rabbitmq-server"]
