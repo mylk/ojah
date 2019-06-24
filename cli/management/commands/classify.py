@@ -31,6 +31,10 @@ class Command(BaseCommand):
         self.logger.info('Training classifier...')
 
         try:
+            channel = self.get_channel()
+            if channel:
+                channel.queue_purge(queue=settings.QUEUE_NAME_TRAIN)
+
             self.classifier = self.get_classifier()
         except (utils.Error, utils.DataError, utils.DatabaseError) as ex_db:
             self.logger.error('Failed to train the classifier.')
@@ -64,7 +68,7 @@ class Command(BaseCommand):
         ) as ex_consume:
             self.logger.error(str(ex_consume))
 
-    def get_consumer(self, queue, callback):
+    def get_channel(self):
         try:
             params = pika.ConnectionParameters(
                 host=settings.QUEUE_HOSTNAME,
@@ -73,6 +77,21 @@ class Command(BaseCommand):
             )
             connection = pika.BlockingConnection(params)
             channel = connection.channel()
+        except (
+                AMQPConnectionError, AMQPChannelError, ChannelClosed, ConnectionClosed,
+                NoFreeChannels
+        ) as ex_channel:
+            self.logger.error(str(ex_channel))
+            return None
+
+        return channel
+
+    def get_consumer(self, queue, callback):
+        try:
+            channel = self.get_channel()
+            if channel is None:
+                return None
+
             channel.queue_declare(queue=queue, durable=True)
             channel.basic_qos(prefetch_count=1)
             channel.basic_consume(callback, queue=queue)
@@ -152,7 +171,6 @@ class Command(BaseCommand):
             time.sleep(10)
 
     def train_callback(self, channel, method, properties, body):
-        channel.basic_ack(delivery_tag=method.delivery_tag)
         channel.queue_purge(queue=settings.QUEUE_NAME_TRAIN)
 
         self.classifier = None

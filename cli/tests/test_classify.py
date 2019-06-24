@@ -88,12 +88,18 @@ class CommandTestCase(TestCase):
         self.thread_train.assert_not_called()
 
     def test_handle_starts_training_the_classifier_and_starts_threads(self):
-        # mock method
+        # mock methods
+        channel = mock.MagicMock()
+        self.command.get_channel = mock.MagicMock(return_value=channel)
         self.command.get_classifier = mock.MagicMock()
 
         # call the method being tested
         self.command.handle()
 
+        # method to get channel was called
+        self.command.get_channel.assert_called_once()
+        # the train queue was purged
+        channel.queue_purge.assert_called_with(queue=settings.QUEUE_NAME_TRAIN)
         # starting of training the classifier and success are logged
         self.logger.info.assert_any_call('Training classifier...')
         self.logger.info.assert_any_call('Classifier is ready!')
@@ -169,6 +175,47 @@ class CommandTestCase(TestCase):
         # no error was logged
         self.logger.error.assert_not_called()
 
+    def test_get_channel_handles_exception_when_connecting_to_broker(self):
+        # mock connection creation method and force it to raise an exception
+        classify.pika.ConnectionParameters = mock.MagicMock(side_effect=ChannelClosed('foo'))
+
+        # call the method being tested
+        channel = self.command.get_channel()
+
+        # the connection parameters are set correctly
+        classify.pika.ConnectionParameters.assert_called_once_with(host=settings.QUEUE_HOSTNAME, heartbeat_interval=600, blocked_connection_timeout=300)
+        # error was logged
+        self.logger.error.assert_any_call('foo')
+        # no broker channel is returned
+        self.assertEquals(None, channel)
+
+    def test_get_channel_returns_channel(self):
+        # call the method being tested
+        channel = self.command.get_channel()
+
+        # the connection parameters are set correctly
+        classify.pika.ConnectionParameters.assert_called_once_with(host=settings.QUEUE_HOSTNAME, heartbeat_interval=600, blocked_connection_timeout=300)
+
+        # no error was logged
+        self.logger.error.assert_not_called()
+        # a broker channel is returned
+        self.assertNotEquals(None, channel)
+
+    def test_get_consumer_raises_no_exception_and_returns_none_when_channel_is_none(self):
+        # just create a fake method to be used as a callback parameter
+        classify_decorator = mock.MagicMock()
+
+        # mock the method that creates the channel
+        self.command.get_channel = mock.MagicMock(return_value=None)
+
+        # call the method being tested
+        channel = self.command.get_consumer(settings.QUEUE_NAME_CLASSIFY, classify_decorator)
+
+        # tried to fetch the channel
+        self.command.get_channel.assert_called_once()
+        # a broker channel is returned
+        self.assertEquals(None, channel)
+
     def test_get_consumer_handles_exception_when_connecting_to_broker(self):
         # mock queue consume method and force it to raise an exception
         self.channel.basic_consume = mock.MagicMock(side_effect=DuplicateConsumerTag('foo'))
@@ -188,34 +235,44 @@ class CommandTestCase(TestCase):
     def test_get_consumer_returns_channel_to_consume_the_classify_queue(self):
         # just create a fake method to be used as a callback parameter
         classify_decorator = mock.MagicMock()
+        # a fake channel that get_channel would return
+        channel = mock.MagicMock()
+
+        # mock the method that creates the channel
+        self.command.get_channel = mock.MagicMock(return_value=channel)
 
         # call the method being tested
         channel = self.command.get_consumer(settings.QUEUE_NAME_CLASSIFY, classify_decorator)
 
-        # the connection parameters are set correctly
-        classify.pika.ConnectionParameters.assert_called_once_with(host=settings.QUEUE_HOSTNAME, heartbeat_interval=600, blocked_connection_timeout=300)
+        # the channel was fetched
+        self.command.get_channel.assert_called_once()
         # the queue consume method was called
-        self.channel.basic_consume.assert_called_once_with(classify_decorator, queue=settings.QUEUE_NAME_CLASSIFY)
+        channel.basic_consume.assert_called_once_with(classify_decorator, queue=settings.QUEUE_NAME_CLASSIFY)
         # no error was logged
         self.logger.error.assert_not_called()
         # a broker channel is returned
-        self.assertEquals(self.channel, channel)
+        self.assertNotEquals(None, channel)
 
     def test_get_consumer_returns_channel_to_consume_the_train_queue(self):
         # just create a fake method to be used as a callback parameter
         train_callback = mock.MagicMock()
+        # a fake channel that get_channel would return
+        channel = mock.MagicMock()
+
+        # mock the method that creates the channel
+        self.command.get_channel = mock.MagicMock(return_value=channel)
 
         # call the method being tested
         channel = self.command.get_consumer(settings.QUEUE_NAME_TRAIN, train_callback)
 
-        # the connection parameters are set correctly
-        classify.pika.ConnectionParameters.assert_called_once_with(host=settings.QUEUE_HOSTNAME, heartbeat_interval=600, blocked_connection_timeout=300)
+        # the channel was fetched
+        self.command.get_channel.assert_called_once()
         # the queue consume method was called
-        self.channel.basic_consume.assert_called_once_with(train_callback, queue=settings.QUEUE_NAME_TRAIN)
+        channel.basic_consume.assert_called_once_with(train_callback, queue=settings.QUEUE_NAME_TRAIN)
         # no error was logged
         self.logger.error.assert_not_called()
         # a broker channel is returned
-        self.assertEquals(self.channel, channel)
+        self.assertNotEquals(None, channel)
 
     def test_get_classifier_returns_empty_naive_bayes_classifier_when_no_corpora(self):
         # mock the shuffle list method
@@ -521,8 +578,6 @@ class CommandTestCase(TestCase):
         # call the method being tested
         self.command.train_callback(self.channel, mock.MagicMock(), None, None)
 
-        # a job from the train queue was acknowledged
-        self.channel.basic_ack.assert_called_once()
         # the train queue was purged
         self.channel.queue_purge.assert_called_once_with(queue=settings.QUEUE_NAME_TRAIN)
         # info was logged
