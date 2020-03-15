@@ -2,6 +2,7 @@ from datetime import datetime
 import mock
 from unittest.mock import patch
 
+from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
@@ -16,7 +17,16 @@ class SourceTestCase(TestCase):
         self.source = Source()
 
     @patch('django.utils.timezone.now')
-    def test_get_minutes_since_last_crawl(self, timezone_mock):
+    def test_get_minutes_since_last_crawl_when_last_crawl_not_set(self, timezone_mock):
+        # mock django.utils.timezone.now
+        timezone_mock.return_value = datetime.strptime('2018-05-11 01:00:00+00:00', '%Y-%m-%d %H:%M:%S%z')
+        # souce was never crawled
+        self.source.last_crawl = None
+
+        self.assertEquals(0, self.source.get_minutes_since_last_crawl())
+
+    @patch('django.utils.timezone.now')
+    def test_get_minutes_since_last_crawl_when_last_crawl_is_set(self, timezone_mock):
         # mock django.utils.timezone.now
         timezone_mock.return_value = datetime.strptime('2018-05-11 01:00:00+00:00', '%Y-%m-%d %H:%M:%S%z')
         # souce was last crawled 30 minutes before
@@ -47,6 +57,12 @@ class SourceTestCase(TestCase):
     def test_is_stale_returns_false_when_pending_and_last_crawl_not_above_threshold(self):
         self.source.pending = True
         self.source.last_crawl = timezone.now()
+
+        self.assertEquals(False, self.source.is_stale())
+
+    def test_is_stale_returns_false_when_pending_and_last_crawl_not_set(self):
+        self.source.pending = True
+        self.source.last_crawl = None
 
         self.assertEquals(False, self.source.is_stale())
 

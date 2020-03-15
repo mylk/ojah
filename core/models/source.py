@@ -15,6 +15,9 @@ class Source(models.Model):
     pending = models.BooleanField(blank=False, null=False, default=False)
 
     def get_minutes_since_last_crawl(self):
+        if self.last_crawl is None:
+            return 0
+
         return abs((timezone.now() - self.last_crawl).seconds / 60)
 
     def crawling(self):
