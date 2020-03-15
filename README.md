@@ -119,8 +119,13 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 Irrelevant to the environment you run the application (your host or containers) the application can
 be visited at `http://127.0.0.1:8000`.
 
-- Add the RSS feeds you want `Ojah!` to crawl using the administration dashboard at `http://127.0.0.1:8000/admin`.
-The default username is `ojah` and the password is `ojah`` too.
+- Add the RSS feeds you want `Ojah!` to crawl using the administration dashboard at:
+
+```
+http://127.0.0.1:8000/admin
+```
+
+The default username is `ojah` and the password is `ojah` too.
 
 - Point your favorite RSS reader at:
 
