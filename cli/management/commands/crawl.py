@@ -1,4 +1,5 @@
 import datetime
+from dateutil.parser import parse
 import logging
 
 from django.core.management.base import BaseCommand
@@ -57,7 +58,14 @@ class Command(BaseCommand):
             return
 
         for entry in feed['entries']:
-            if NewsItem.exists(entry['title'], entry['updated'], source):
+            if 'published' in entry:
+                pass
+            elif 'updated' in entry:
+                entry['published'] = entry['updated']
+            else:
+                entry['published'] = datetime.datetime.now().isoformat()
+
+            if NewsItem.exists(entry['title'], parse(entry['published']), source):
                 continue
 
             description = entry['summary'] if 'summary' in entry else entry['title']
@@ -68,9 +76,7 @@ class Command(BaseCommand):
             news_item.url = entry['link']
             news_item.source = source
             news_item.score = None
-            news_item.added_at = datetime.datetime.strptime(
-                entry['updated'], '%Y-%m-%dT%H:%M:%S%z'
-            )
+            news_item.added_at = parse(entry['published'])
             news_item.save()
 
             body = serializers.serialize('json', [news_item])
