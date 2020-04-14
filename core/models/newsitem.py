@@ -11,7 +11,7 @@ class NewsItem(models.Model):
     title = models.CharField(max_length=300)
     description = models.TextField()
     source = models.ForeignKey(Source, null=True, on_delete=models.DO_NOTHING)
-    url = models.URLField(null=True)
+    url = models.CharField(max_length=300)
     score = models.DecimalField(decimal_places=2, max_digits=10, null=True)
     published = models.BooleanField(default=False, null=False)
     added_at = models.DateTimeField(default=timezone.now)

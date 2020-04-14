@@ -88,6 +88,7 @@ DATABASES = {
         'PASSWORD': os.environ['MYSQL_PASSWORD'],
         'HOST': 'mariadb',
         'PORT': '3306',
+        'OPTIONS': {'charset': 'utf8mb4'}
     }
 }
 
@@ -147,9 +148,9 @@ LOGGING = {
         }
     },
     'handlers': {
-        'console':{
-            'level':'DEBUG',
-            'class':'logging.StreamHandler',
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },
         'file_django': {
