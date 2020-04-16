@@ -1,7 +1,7 @@
-Django>=2.2.10
+Django>=2.2.12
 mysqlclient==1.4.2.post1
 whitenoise==5.0.1
-django-admin-rangefilter==0.3.7
+django-admin-rangefilter==0.3.16
 pika==0.12.0
 textblob==0.12.0
 nltk>=3.4.5
