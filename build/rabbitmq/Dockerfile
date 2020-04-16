@@ -13,7 +13,8 @@ RUN apt update && \
     touch /var/lib/rabbitmq/.erlang.cookie
 
 # config
-COPY build/rabbitmq/rabbitmq.conf /etc/rabbitmq/rabbitmq.conf
+ADD build/rabbitmq/rabbitmq.conf /etc/rabbitmq/
+ADD build/rabbitmq/definitions.json /etc/rabbitmq/
 
 USER ${HOST_USER_NAME}
 
