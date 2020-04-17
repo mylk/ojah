@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from django.utils import timezone
 from core.models.source import Source
@@ -18,7 +20,11 @@ class NewsItem(models.Model):
 
     @staticmethod
     def exists(title, added_at, source):
-        news_items_existing = NewsItem.objects.filter(title=title, added_at=added_at, source=source)
+        news_items_existing = NewsItem.objects.filter(
+            title=title,
+            added_at__gt=added_at-datetime.timedelta(hours=24),
+            source=source
+        )
         return len(news_items_existing) > 0
 
     @staticmethod
