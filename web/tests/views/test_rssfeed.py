@@ -52,8 +52,8 @@ class RssFeedTestCase(TestCase):
         self.news_item.url = 'https://www.google.com'
         self.assertEquals('https://www.google.com', self.rss_feed.item_link(self.news_item))
 
-    def test_item_link_returns_none_when_newsitem_url_not_set(self):
-        self.assertEquals(None, self.rss_feed.item_link(self.news_item))
+    def test_item_link_returns_empty_string_when_newsitem_url_not_set(self):
+        self.assertEquals('', self.rss_feed.item_link(self.news_item))
 
     def test_item_pubdate_returns_none_when_newsitem_added_at_not_set(self):
         self.assertNotEquals(None, self.rss_feed.item_pubdate(self.news_item))

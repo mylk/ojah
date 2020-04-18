@@ -1,10 +1,10 @@
-import datetime
 from dateutil.parser import parse
 import logging
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.core import serializers
+from django.utils import timezone
 import feedparser
 import pika
 
@@ -63,7 +63,7 @@ class Command(BaseCommand):
             elif 'updated' in entry:
                 entry['published'] = entry['updated']
             else:
-                entry['published'] = datetime.datetime.now().isoformat()
+                entry['published'] = timezone.now().isoformat()
 
             if NewsItem.exists(entry['title'], parse(entry['published']), source):
                 continue

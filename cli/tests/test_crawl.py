@@ -1,5 +1,6 @@
 from datetime import datetime
 import mock
+from unittest.mock import patch
 
 from django.utils import timezone
 from django.test import TestCase
@@ -11,18 +12,20 @@ from cli.management.commands import crawl
 
 class CommandTestCase(TestCase):
 
-    feed = {
-        'entries': [
-            {
-                'title': 'foo',
-                'summary': 'baz',
-                'updated': '2018-12-14T20:00:00+0000',
-                'link': 'https://www.google.com'
-            }
-        ]
-    }
+    feed = {}
 
     def setUp(self):
+        self.feed = {
+            'entries': [
+                {
+                    'title': 'foo',
+                    'summary': 'baz',
+                    'updated': '2018-12-14T20:00:00+0000',
+                    'link': 'https://www.google.com'
+                }
+            ]
+        }
+
         # retain the original imported packages
         crawl.pika_real = crawl.pika
         crawl.logging_real = crawl.logging
@@ -304,6 +307,101 @@ class CommandTestCase(TestCase):
         # assert that one exists and the description has the title's value
         self.assertEquals(1, len(list(news_items)))
         self.assertEquals('foo', news_items[0].description)
+
+    def test_crawl_sets_newsitem_publish_date_to_published_value_when_published_exists(self):
+        # set a new field for the date to the fake feed entry
+        self.feed['entries'][0]['published'] = self.feed['entries'][0]['updated']
+        self.feed['entries'][0]['updated'] = datetime.now().isoformat()
+        # force exists() to return that the news item does not exist to database
+        crawl.NewsItem.exists = mock.MagicMock(return_value=False)
+        # revert mocking the save method of the news item model
+        crawl.NewsItem.save = crawl.NewsItem.save_real
+        # mock the parser to return the fake feed entries
+        crawl.feedparser.parse = mock.MagicMock(return_value=self.feed)
+        self.command = crawl.Command()
+
+        # create a fake source to crawl
+        source = Source()
+        source.name = 'bar'
+        source.save()
+
+        # the method being tested
+        self.command.crawl(source, self.channel)
+
+        # logging the start of the crawling
+        self.logger.info.assert_any_call('Crawling \'%s\'...', 'bar')
+        # no error logged
+        self.logger.error.assert_not_called()
+
+        # get the news item inserted into the database
+        news_items = NewsItem.objects.all()
+        # assert that one exists and added_at has the published value
+        self.assertEquals(1, len(list(news_items)))
+        self.assertEquals(
+            datetime.strptime(self.feed['entries'][0]['published'], '%Y-%m-%dT%H:%M:%S%z'),
+            news_items[0].added_at
+        )
+
+    def test_crawl_sets_newsitem_publish_date_to_updated_value_when_updated_exists(self):
+        # force exists() to return that the news item does not exist to database
+        crawl.NewsItem.exists = mock.MagicMock(return_value=False)
+        # revert mocking the save method of the news item model
+        crawl.NewsItem.save = crawl.NewsItem.save_real
+        # mock the parser to return the fake feed entries
+        crawl.feedparser.parse = mock.MagicMock(return_value=self.feed)
+        self.command = crawl.Command()
+
+        # create a fake source to crawl
+        source = Source()
+        source.name = 'bar'
+        source.save()
+
+        # the method being tested
+        self.command.crawl(source, self.channel)
+
+        # logging the start of the crawling
+        self.logger.info.assert_any_call('Crawling \'%s\'...', 'bar')
+        # no error logged
+        self.logger.error.assert_not_called()
+
+        # get the news item inserted into the database
+        news_items = NewsItem.objects.all()
+        # assert that one exists and added_at has the updated value
+        self.assertEquals(1, len(list(news_items)))
+        self.assertEquals(
+            datetime.strptime(self.feed['entries'][0]['updated'], '%Y-%m-%dT%H:%M:%S%z'),
+            news_items[0].added_at
+        )
+
+    def test_crawl_sets_newsitem_publish_date_to_now_when_published_and_updated_do_not_exist(self):
+        # delete the updated field from fake feed entry
+        del(self.feed['entries'][0]['updated'])
+        # force exists() to return that the news item does not exist to database
+        crawl.NewsItem.exists = mock.MagicMock(return_value=False)
+        # revert mocking the save method of the news item model
+        crawl.NewsItem.save = crawl.NewsItem.save_real
+        # mock the parser to return the fake feed entries
+        crawl.feedparser.parse = mock.MagicMock(return_value=self.feed)
+        self.command = crawl.Command()
+
+        # create a fake source to crawl
+        source = Source()
+        source.name = 'bar'
+        source.save()
+
+        # the method being tested
+        self.command.crawl(source, self.channel)
+
+        # logging the start of the crawling
+        self.logger.info.assert_any_call('Crawling \'%s\'...', 'bar')
+        # no error logged
+        self.logger.error.assert_not_called()
+
+        # get the news item inserted into the database
+        news_items = NewsItem.objects.all()
+        # assert that one exists and added_at is today
+        self.assertEquals(1, len(list(news_items)))
+        self.assertEquals(timezone.now().date(), news_items[0].added_at.date())
 
     def test_crawl_enqueues_classification_of_newsitem_and_marks_source_as_crawled(self):
         # force exists() to return that the news item does not exist to database

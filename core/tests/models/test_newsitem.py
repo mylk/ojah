@@ -1,3 +1,5 @@
+import datetime
+
 from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
@@ -34,7 +36,7 @@ class NewsItemTestCase(TestCase):
 
         self.assertEquals(False, exists)
 
-    def test_exists_returns_true_when_newsitem_exists(self):
+    def test_exists_returns_true_when_newsitem_exists_and_added_in_threshold(self):
         source = Source()
         source.name = 'foo'
         source.save()
@@ -49,6 +51,22 @@ class NewsItemTestCase(TestCase):
         exists = NewsItem.exists(title, added_at, source)
 
         self.assertEquals(True, exists)
+
+    def test_exists_returns_false_when_newsitem_exists_and_added_out_of_threshold(self):
+        source = Source()
+        source.name = 'foo'
+        source.save()
+
+        title = 'foo'
+        added_at = timezone.now()
+        self.news_item.title = title
+        self.news_item.added_at = added_at-datetime.timedelta(hours=25)
+        self.news_item.source = source
+        self.news_item.save()
+
+        exists = NewsItem.exists(title, added_at, source)
+
+        self.assertEquals(False, exists)
 
     def test_find_positive_returns_empty_list_when_no_newsitems_exist(self):
         news_items = self.news_item.find_positive(
