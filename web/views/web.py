@@ -40,7 +40,7 @@ def about(request):
 
     news_items_count = NewsItem.objects.all().count()
     corpora_count = Corpus.objects.all().count()
-    sources_count = Source.objects.all().count()
+    sources_count = Source.objects.filter(active=True).count()
 
     context = {
         'accuracy_total': accuracy_total,

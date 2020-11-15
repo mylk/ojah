@@ -114,7 +114,28 @@ class CommandTestCase(TestCase):
         # actual crawl not called
         self.command.crawl.assert_not_called()
 
-    def test_handle_crawls_specific_source_when_source_name_option_is_set_and_source_exists(self):
+    def test_handle_exits_when_source_name_option_is_set_and_source_is_inactive(self):
+        source = Source()
+        source.name = 'foo'
+        source.active = False
+        source.save()
+
+        self.command.crawl = mock.MagicMock()
+
+        # the method being tested
+        self.command.handle(name='bar')
+
+        # error logged
+        self.logger.error.assert_called_once_with('No source(s) found.')
+        # no interaction with the queue
+        crawl.pika.BlockingConnection.assert_not_called()
+        crawl.pika.ConnectionParameters.assert_not_called()
+        self.connection.channel.assert_not_called()
+        self.channel.queue_declare.assert_not_called()
+        # actual crawl not called
+        self.command.crawl.assert_not_called()
+
+    def test_handle_crawls_specific_source_when_source_name_option_is_set_and_source_exists_and_is_active(self):
         source = Source()
         source.name = 'foo'
         source.save()
@@ -150,7 +171,7 @@ class CommandTestCase(TestCase):
         # actual crawl not called
         self.command.crawl.assert_not_called()
 
-    def test_handle_crawls_all_sources_when_no_source_name_option_is_set_and_sources_exist(self):
+    def test_handle_crawls_all_sources_when_no_source_name_option_is_set_and_active_sources_exist(self):
         source = Source()
         source.name = 'foo'
         source.save()
@@ -173,6 +194,31 @@ class CommandTestCase(TestCase):
         self.channel.queue_declare.assert_called_once()
         # crawl was called one for each source existing
         self.assertEquals(2, self.command.crawl.call_count)
+
+    def test_handle_crawls_active_sources_when_no_source_name_option_is_set_and_both_active_and_inactive_sources_exist(self):
+        source = Source()
+        source.name = 'foo'
+        source.save()
+
+        source = Source()
+        source.name = 'bar'
+        source.active = False
+        source.save()
+
+        self.command.crawl = mock.MagicMock()
+
+        # the method being tested
+        self.command.handle(name=None)
+
+        # no error logged
+        self.logger.error.assert_not_called()
+        # interaction with the queue
+        crawl.pika.BlockingConnection.assert_called_once()
+        crawl.pika.ConnectionParameters.assert_called_once()
+        self.connection.channel.assert_called_once()
+        self.channel.queue_declare.assert_called_once()
+        # crawl was called one for each source existing
+        self.assertEquals(1, self.command.crawl.call_count)
 
     def test_handle_exits_when_source_is_pending_but_not_stale(self):
         source = Source()

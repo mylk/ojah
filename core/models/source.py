@@ -13,6 +13,7 @@ class Source(models.Model):
     homepage = models.CharField(max_length=100, blank=True, null=True)
     last_crawl = models.DateTimeField(blank=True, null=True)
     pending = models.BooleanField(blank=False, null=False, default=False)
+    active = models.BooleanField(blank=False, null=False, default=True)
 
     def get_minutes_since_last_crawl(self):
         if self.last_crawl is None:

@@ -81,11 +81,19 @@ class WebTestCase(TestCase):
         news_item.published = False
         news_item.save()
 
-        # create a source
+        # create an active source
         source = Source()
         source.name = 'foo'
-        source.url = 'http://www.google.com'
-        source.homepage = 'http://www.google.com'
+        source.url = 'http://www.foo.com'
+        source.homepage = 'http://www.foo.com'
+        source.save()
+
+        # create an inactive source
+        source = Source()
+        source.name = 'bar'
+        source.url = 'http://www.bar.com'
+        source.homepage = 'http://www.bar.com'
+        source.active = False
         source.save()
 
         # make request to news view

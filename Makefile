@@ -14,6 +14,9 @@ deps_corpora:
 	python -m textblob.download_corpora lite
 	python -c "import nltk; nltk.download('stopwords')"
 
+makemigrations:
+	docker-compose run --rm app /bin/sh -c "./manage.py makemigrations" ; \
+
 init:
 	./manage.py migrate
 	./manage.py loaddata initial_data

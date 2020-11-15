@@ -29,7 +29,7 @@ class Command(BaseCommand):
         if name:
             sources = Source.objects.filter(name=name)
         else:
-            sources = Source.objects.all()
+            sources = Source.objects.filter(active=True)
 
         if not sources:
             self.logger.error('No source(s) found.')
