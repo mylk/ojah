@@ -33,3 +33,4 @@ clean:
 
 test: clean
 	docker-compose run --rm test
+	docker-compose down
