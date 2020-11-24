@@ -4,10 +4,8 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.template import loader
 
-from core.models.corpus import Corpus
 from core.models.newsitem import NewsItem
-from core.models.newsitem_metric import NewsItemMetric
-from core.models.source import Source
+from core.models.statistic import Statistic
 
 
 def news(request):
@@ -27,26 +25,19 @@ def news(request):
 
 def about(request):
     template = loader.get_template('web/about.html')
+
     now = datetime.now()
+    today_midnight = '{}-{:02d}-{:02d} 00:00:00'.format(now.year, int(now.month), int(now.day))
+    # get the latest of the created statistics for today
+    statistics = Statistic.objects.filter(created_at__gte=today_midnight).order_by('-created_at')
 
-    news_item_metric = NewsItemMetric()
-    accuracy_total = news_item_metric.get_accuracy_total({
-        'date_from': '2018-01-01 00:00:00',
-        'date_to': '{}-{:02d}-{:02d} 23:59:59'.format(
-            now.year, int(now.month), int(now.day)
-        )
-    })
-    accuracy_total = '{}%'.format(round(accuracy_total)) if accuracy_total else '-'
-
-    news_items_count = NewsItem.objects.all().count()
-    corpora_count = Corpus.objects.all().count()
-    sources_count = Source.objects.filter(active=True).count()
+    accuracy_total = '{}%'.format(statistics[0].accuracy_total) if statistics[0].accuracy_total else None
 
     context = {
         'accuracy_total': accuracy_total,
-        'news_items_count': news_items_count,
-        'corpora_count': corpora_count,
-        'sources_count': sources_count
+        'news_items_count': statistics[0].news_items_count,
+        'corpora_count': statistics[0].corpora_count,
+        'sources_count': statistics[0].sources_count
     }
 
     return HttpResponse(template.render(context))

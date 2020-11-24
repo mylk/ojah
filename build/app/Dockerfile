@@ -24,6 +24,9 @@ RUN apk add make curl sudo gcc libc-dev linux-headers fail2ban mariadb-dev maria
 COPY build/app/fail2ban/filter.d/ojah.conf /etc/fail2ban/filter.d/ojah.conf
 COPY build/app/fail2ban/jail.local /etc/fail2ban/jail.local
 
+# cron
+COPY build/app/crontab /var/spool/cron/crontabs/root
+
 USER ${HOST_USER_NAME}
 
 CMD ["/ojah/build/app/start.sh"]
