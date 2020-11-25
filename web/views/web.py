@@ -37,7 +37,8 @@ def about(request):
         'accuracy_total': accuracy_total,
         'news_items_count': statistics[0].news_items_count,
         'corpora_count': statistics[0].corpora_count,
-        'sources_count': statistics[0].sources_count
+        'sources_count': statistics[0].sources_count,
+        'created_at': statistics[0].created_at
     }
 
     return HttpResponse(template.render(context))
