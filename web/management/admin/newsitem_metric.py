@@ -88,6 +88,7 @@ class NewsItemMetricAdmin(admin.ModelAdmin):
         # query for corpora
         params_corpus = dict(params)
         params_corpus['positive'] = True
+        params_corpus['active'] = True
         corpus_count_positive = Corpus.objects.filter(**params_corpus).count()
         params_corpus['positive'] = False
         corpus_count_negative = Corpus.objects.filter(**params_corpus).count()

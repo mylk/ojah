@@ -12,6 +12,7 @@ class Corpus(models.Model):
 
     news_item = models.ForeignKey(NewsItem, null=False, on_delete=models.DO_NOTHING)
     positive = models.BooleanField(default=False, null=False)
+    active = models.BooleanField(default=True, null=False)
     added_at = models.DateTimeField(default=timezone.now)
 
     def get_classification(self):

@@ -106,7 +106,7 @@ class Command(BaseCommand):
         stopwords_pattern = re.compile(r'\b(' + r'|'.join(stopwords_blacklisted) + r')\b\s*')
 
         corpora_classified = list()
-        for corpus in Corpus.objects.all():
+        for corpus in Corpus.objects.filter(active=True):
             title = stopwords_pattern.sub('', corpus.news_item.title)
             corpora_classified.append((title, corpus.get_classification()))
 

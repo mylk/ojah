@@ -32,7 +32,7 @@ class Command(BaseCommand):
         accuracy_total = round(accuracy_total)
 
         news_items_count = NewsItem.objects.all().count()
-        corpora_count = Corpus.objects.all().count()
+        corpora_count = Corpus.objects.filter(active=True).count()
         sources_count = Source.objects.filter(active=True).count()
 
         statistic = Statistic()
