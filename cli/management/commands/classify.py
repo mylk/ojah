@@ -17,6 +17,7 @@ ConnectionClosed, DuplicateConsumerTag, NoFreeChannels
 from textblob.classifiers import NaiveBayesClassifier
 
 from core.models.corpus import Corpus
+from cli.management.handlers.publish_handler import PublishHandler
 
 
 class Command(BaseCommand):
@@ -139,12 +140,9 @@ class Command(BaseCommand):
             self.logger.info('Classifying #%s...', queue_item.id)
             classification = self.classifier.classify(queue_item.title)
 
+            handler = PublishHandler()
             try:
-                queue_item.score = 1 if classification == 'pos' else 0
-                queue_item.published = False
-                if settings.AUTO_PUBLISH and classification == 'pos':
-                    queue_item.published = True
-                queue_item.save()
+                handler.run(queue_item, classification)
             except (FieldDoesNotExist, FieldError, ValidationError) as ex_save:
                 self.reject_queue_item(channel, method)
                 self.logger.error('Classifier could not save the item due to "%s"', str(ex_save))
