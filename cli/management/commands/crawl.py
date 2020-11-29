@@ -84,7 +84,10 @@ class Command(BaseCommand):
                 exchange='',
                 routing_key=settings.QUEUE_NAME_CLASSIFY,
                 body=body,
-                properties=pika.BasicProperties(delivery_mode=2)
+                properties=pika.BasicProperties(
+                    delivery_mode=2,
+                    headers={'x-is-self-train': False}
+                )
             )
 
         source.crawled()

@@ -18,6 +18,7 @@ from textblob.classifiers import NaiveBayesClassifier
 
 from core.models.corpus import Corpus
 from cli.management.handlers.publish_handler import PublishHandler
+from cli.management.handlers.corpus_handler import CorpusHandler
 
 
 class Command(BaseCommand):
@@ -132,6 +133,7 @@ class Command(BaseCommand):
 
             try:
                 queue_item = next(queue_items).object
+                is_self_train = properties.headers['x-is-self-train']
             except (StopIteration, RuntimeError) as ex_item:
                 self.reject_queue_item(channel, method)
                 self.logger.error('Classifier failed to get object from deserialized body.')
@@ -140,12 +142,14 @@ class Command(BaseCommand):
             self.logger.info('Classifying #%s...', queue_item.id)
             classification = self.classifier.classify(queue_item.title)
 
-            handler = PublishHandler()
+            # self training will create corpus, crawl will update the news item
+            handler = CorpusHandler() if is_self_train else PublishHandler()
+
             try:
                 handler.run(queue_item, classification)
             except (FieldDoesNotExist, FieldError, ValidationError) as ex_save:
                 self.reject_queue_item(channel, method)
-                self.logger.error('Classifier could not save the item due to "%s"', str(ex_save))
+                self.logger.error('Classifier could not handle the item due to "%s"', str(ex_save))
                 return
 
             try:
