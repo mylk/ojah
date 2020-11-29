@@ -97,6 +97,24 @@ make init
 ./manage.py classify
 ```
 
+- Re-queue for classification the news items missing score:
+
+```
+./manage.py classify_requeue
+```
+
+- Pre-calculate stats shown in about page:
+
+```
+./manage.py stats_calculate
+```
+
+- Re-queue for classification the news items that have been previously scored as negative:
+
+```
+./manage.py train_self
+```
+
 ### Run in containers
 
 So you love containers like me. Things are really simple here, you can have everything being ran
