@@ -50,5 +50,20 @@ class NewsItem(models.Model):
             LIMIT %s
         ''', [score_threshold, news_items_count])
 
+    @staticmethod
+    def find_negative(score_threshold):
+        return NewsItem.objects.raw('''
+            SELECT *
+            FROM news_item
+            WHERE score < %s
+            AND id NOT IN (
+                SELECT news_item_id
+                FROM corpus
+                WHERE positive = 1
+            )
+            AND published = 0
+            ORDER BY added_at DESC;
+        ''', [score_threshold])
+
     def __str__(self):
         return self.title
