@@ -25,6 +25,8 @@ class CorpusAdmin(admin.ModelAdmin):
     def get_news_item_title(obj):
         return obj.news_item.title
 
+    readonly_fields = ('news_item_link',)
+    fields = ('news_item_link', 'positive', 'active', 'added_at')
     list_display = ['get_news_item_title', 'positive', 'active', 'added_at']
     list_filter = ['positive', 'active']
     ordering = ['-added_at']

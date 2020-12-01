@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from core.models.newsitem import NewsItem
+from django.utils.html import format_html
 
 
 class Corpus(models.Model):
@@ -20,3 +21,12 @@ class Corpus(models.Model):
 
     def __str__(self):
         return '{}: {}'.format(self.news_item.title, self.get_classification().upper())
+
+    def news_item_link(self):
+        return format_html(
+            '<a href="{}">{}</a>',
+            self.news_item.url,
+            self.news_item.title,
+        )
+
+    news_item_link.short_description = 'News Item'
