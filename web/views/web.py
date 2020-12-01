@@ -36,6 +36,7 @@ def about(request):
     context = {
         'accuracy_total': accuracy_total,
         'news_items_count': statistics[0].news_items_count,
+        'pending_classify_count': statistics[0].pending_classify_count,
         'corpora_count': statistics[0].corpora_count,
         'sources_count': statistics[0].sources_count,
         'created_at': statistics[0].created_at

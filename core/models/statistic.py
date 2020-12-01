@@ -9,6 +9,7 @@ class Statistic(models.Model):
 
     accuracy_total = models.SmallIntegerField(null=True)
     news_items_count = models.PositiveIntegerField(null=True)
+    pending_classify_count = models.PositiveIntegerField(null=True)
     corpora_count = models.IntegerField(null=True)
     sources_count = models.SmallIntegerField(null=True)
     created_at = models.DateTimeField(default=timezone.now)
