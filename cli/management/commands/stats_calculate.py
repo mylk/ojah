@@ -34,6 +34,7 @@ class Command(BaseCommand):
         accuracy_total = round(accuracy_total)
 
         news_items_count = NewsItem.objects.all().count()
+        news_items_not_scored_count = NewsItem.objects.filter(score=None).count()
         corpora_count = Corpus.objects.filter(active=True).count()
         sources_count = Source.objects.filter(active=True).count()
 
@@ -52,6 +53,7 @@ class Command(BaseCommand):
         statistic.accuracy_total = accuracy_total
         statistic.news_items_count = news_items_count
         statistic.pending_classify_count = pending_classify_count
+        statistic.news_items_not_scored_count = news_items_not_scored_count
         statistic.corpora_count = corpora_count
         statistic.sources_count = sources_count
         statistic.save()
