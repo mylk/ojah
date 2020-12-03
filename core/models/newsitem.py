@@ -51,6 +51,19 @@ class NewsItem(models.Model):
         ''', [score_threshold, news_items_count])
 
     @staticmethod
+    def find_neutral():
+        return NewsItem.objects.raw('''
+            SELECT *
+            FROM news_item
+            WHERE published = 0
+            AND score = 1
+            AND id NOT IN (
+                SELECT news_item_id
+                FROM corpus
+            )
+        ''')
+
+    @staticmethod
     def find_negative(score_threshold):
         return NewsItem.objects.raw('''
             SELECT *

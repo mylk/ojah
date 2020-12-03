@@ -17,6 +17,7 @@ ConnectionClosed, DuplicateConsumerTag, NoFreeChannels
 from textblob.classifiers import NaiveBayesClassifier
 
 from core.models.corpus import Corpus
+from core.models.newsitem import NewsItem
 from cli.management.handlers.publish_handler import PublishHandler
 from cli.management.handlers.corpus_handler import CorpusHandler
 
@@ -111,6 +112,10 @@ class Command(BaseCommand):
         for corpus in Corpus.objects.filter(active=True):
             title = stopwords_pattern.sub('', corpus.news_item.title)
             corpora_classified.append((title, corpus.get_classification()))
+
+        for news_item in NewsItem.find_neutral():
+            title = stopwords_pattern.sub('', news_item.title)
+            corpora_classified.append((title, 'neu'))
 
         corpora_classified = list(set(corpora_classified))
         shuffle(corpora_classified)
