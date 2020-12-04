@@ -1,4 +1,6 @@
 import logging
+import os
+import pickle
 from random import shuffle
 import re
 import threading
@@ -31,14 +33,18 @@ class Command(BaseCommand):
         self.logger = logging.getLogger('web')
 
     def handle(self, *args, **options):
-        self.logger.info('Training classifier...')
-
         try:
             channel = self.get_channel()
             if channel:
                 channel.queue_purge(queue=settings.QUEUE_NAME_TRAIN)
 
-            self.classifier = self.get_classifier()
+            if os.path.isfile(settings.CLASSIFIER_DUMP_FILEPATH):
+                self.logger.info('Classifier dump found!')
+                self.classifier = pickle.load(open(settings.CLASSIFIER_DUMP_FILEPATH, 'rb'))
+            else:
+                self.logger.info('Classifier dump not found.')
+                self.classifier = self.get_classifier()
+
         except (utils.Error, utils.DataError, utils.DatabaseError) as ex_db:
             self.logger.error('Failed to train the classifier.')
             return
@@ -105,6 +111,8 @@ class Command(BaseCommand):
         return channel
 
     def get_classifier(self):
+        self.logger.info('Training classifier...')
+
         stopwords_blacklisted = self.get_stopwords()
         stopwords_pattern = re.compile(r'\b(' + r'|'.join(stopwords_blacklisted) + r')\b\s*')
 
@@ -120,7 +128,13 @@ class Command(BaseCommand):
         corpora_classified = list(set(corpora_classified))
         shuffle(corpora_classified)
 
-        return NaiveBayesClassifier(corpora_classified)
+        classifier = NaiveBayesClassifier(corpora_classified)
+
+        self.logger.info('Dumping classifier.')
+        pickle.dump(classifier, open(settings.CLASSIFIER_DUMP_FILEPATH, 'wb'))
+        self.logger.info('Classifier dumped!')
+
+        return classifier
 
     def classify_decorator(self, channel, method, properties, body):
         self.classify_callback(channel, method, properties, body)

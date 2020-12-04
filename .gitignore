@@ -5,6 +5,7 @@
 
 web/staticfiles/*
 logs/*
+data/classifier/*
 data/mariadb/data/*
 data/rabbitmq/mnesia/*
 
@@ -14,5 +15,6 @@ db.sqlite3
 
 !web/staticfiles/.gitkeep
 !logs/.gitkeep
+!data/classifier/.gitkeep
 !data/mariadb/data/.gitkeep
 !data/rabbitmq/mnesia/.gitkeep
