@@ -35,7 +35,10 @@ class Command(BaseCommand):
                 exchange='',
                 routing_key=settings.QUEUE_NAME_CLASSIFY,
                 body=body,
-                properties=pika.BasicProperties(delivery_mode=2)
+                properties=pika.BasicProperties(
+                    delivery_mode=2,
+                    headers={'x-is-self-train': False}
+                )
             )
 
             self.logger.info('Successfully re-queued #%s "%s"!', news_item.id, news_item.title)
