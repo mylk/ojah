@@ -7,6 +7,11 @@ from django.contrib import admin
 def corpus_activate(model_admin, request, query_set):
     for corpus in query_set:
         corpus.active = True
+
+        publish = True if corpus.positive else False
+        corpus.news_item.published = publish
+        corpus.news_item.save()
+
         corpus.save()
 
     if query_set:
@@ -33,7 +38,7 @@ def corpus_convert_to_positive(model_admin, request, query_set):
         corpus.positive = True
         corpus.save()
 
-        if corpus.published:
+        if corpus.news_item.published:
             any_published = True
 
     if any_published:
@@ -49,7 +54,7 @@ def corpus_convert_to_negative(model_admin, request, query_set):
         corpus.positive = False
         corpus.save()
 
-        if corpus.published:
+        if corpus.news_item.published:
             any_published = True
 
     if any_published:
