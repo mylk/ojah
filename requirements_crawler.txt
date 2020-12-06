@@ -2,5 +2,5 @@ Django>=2.2.12
 mysqlclient==1.4.2.post1
 django-admin-rangefilter==0.3.16
 pika==0.12.0
-feedparser==5.2.1
+feedparser==6.0.1
 python-dateutil==2.8.1
