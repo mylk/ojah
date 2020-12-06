@@ -10,7 +10,7 @@ def corpus_activate(model_admin, request, query_set):
         corpus.save()
 
     if query_set:
-        enqueue_corpus_activation()
+        enqueue_train()
 
 corpus_activate.short_description = 'Activate'
 
@@ -21,12 +21,44 @@ def corpus_deactivate(model_admin, request, query_set):
         corpus.save()
 
     if query_set:
-        enqueue_corpus_activation()
+        enqueue_train()
 
 corpus_deactivate.short_description = 'Deactivate'
 
 
-def enqueue_corpus_activation():
+def corpus_convert_to_positive(model_admin, request, query_set):
+    any_published = False
+
+    for corpus in query_set:
+        corpus.positive = True
+        corpus.save()
+
+        if corpus.published:
+            any_published = True
+
+    if any_published:
+        enqueue_train()
+
+corpus_convert_to_positive.short_description = 'Convert to positive'
+
+
+def corpus_convert_to_negative(model_admin, request, query_set):
+    any_published = False
+
+    for corpus in query_set:
+        corpus.positive = False
+        corpus.save()
+
+        if corpus.published:
+            any_published = True
+
+    if any_published:
+        enqueue_train()
+
+corpus_convert_to_negative.short_description = 'Convert to negative'
+
+
+def enqueue_train():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.QUEUE_HOSTNAME))
     channel = connection.channel()
     channel.queue_declare(queue=settings.QUEUE_NAME_TRAIN, durable=True)
@@ -52,4 +84,6 @@ class CorpusAdmin(admin.ModelAdmin):
     actions = [
         corpus_activate,
         corpus_deactivate,
+        corpus_convert_to_positive,
+        corpus_convert_to_negative
     ]
