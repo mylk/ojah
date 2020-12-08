@@ -38,11 +38,20 @@ class Command(BaseCommand):
             if channel:
                 channel.queue_purge(queue=settings.QUEUE_NAME_TRAIN)
 
+            should_train_classifier = True
             if os.path.isfile(settings.CLASSIFIER_DUMP_FILEPATH):
+                should_train_classifier = False
+
                 self.logger.info('Classifier dump found!')
-                self.classifier = pickle.load(open(settings.CLASSIFIER_DUMP_FILEPATH, 'rb'))
+                try:
+                    self.classifier = pickle.load(open(settings.CLASSIFIER_DUMP_FILEPATH, 'rb'))
+                except EOFError as eof_error:
+                    should_train_classifier = True
+                    self.logger.error('Could not load dump because of: {}'.format(str(eof_error)))
             else:
                 self.logger.info('Classifier dump not found.')
+
+            if should_train_classifier:
                 self.classifier = self.get_classifier()
 
         except (utils.Error, utils.DataError, utils.DatabaseError) as ex_db:
