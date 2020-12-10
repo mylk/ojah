@@ -1,12 +1,12 @@
 from dateutil.parser import parse
+import feedparser
 import logging
+import pika
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.core import serializers
 from django.utils import timezone
-import feedparser
-import pika
 
 from core.models.source import Source
 from core.models.newsitem import NewsItem

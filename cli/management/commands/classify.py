@@ -156,7 +156,7 @@ class Command(BaseCommand):
                 queue_items = serializers.deserialize('json', body)
             except DeserializationError as ex_deserialize:
                 self.reject_queue_item(channel, method)
-                self.logger.error('Classifier failed to deserialize body.')
+                self.logger.error('Classifier failed to deserialize news items.')
                 return
 
             try:
@@ -164,7 +164,7 @@ class Command(BaseCommand):
                 is_self_train = properties.headers['x-is-self-train']
             except (StopIteration, RuntimeError) as ex_item:
                 self.reject_queue_item(channel, method)
-                self.logger.error('Classifier failed to get object from deserialized body.')
+                self.logger.error('Classifier failed to get object from deserialized news items body.')
                 return
 
             self.logger.info('Classifying #%s...', queue_item.id)
@@ -201,15 +201,41 @@ class Command(BaseCommand):
             time.sleep(10)
 
     def train_callback(self, channel, method, properties, body):
-        channel.queue_purge(queue=settings.QUEUE_NAME_TRAIN)
-
-        self.classifier = None
-        self.logger.info('train_callback(): Starting training...')
         try:
-            self.classifier = self.get_classifier()
-            self.logger.info('train_callback(): Finished training!')
+            queue_items = serializers.deserialize('json', body)
+        except DeserializationError as ex_deserialize:
+            self.reject_queue_item(channel, method)
+            self.logger.error('Classifier failed to deserialize corpora.')
+            return
+
+        try:
+            corpora = next(queue_items).object
+        except (StopIteration, RuntimeError) as ex_item:
+            self.reject_queue_item(channel, method)
+            self.logger.error('Classifier failed to get object from deserialized corpora body.')
+            return
+
+        stopwords_blacklisted = self.get_stopwords()
+        stopwords_pattern = re.compile(r'\b(' + r'|'.join(stopwords_blacklisted) + r')\b\s*')
+
+        self.logger.info('train_callback(): Updating classifier...')
+        try:
+            title = stopwords_pattern.sub('', corpora.news_item.title)
+            self.classifier.update([(title, corpora.get_classification())])
+            self.logger.info('train_callback(): Finished updating classifier!')
         except (utils.Error, utils.DataError, utils.DatabaseError) as ex_db:
-            self.logger.error('Failed to train the classifier.')
+            self.logger.error('Failed to update the classifier.')
+
+        # dump the classifier if no other corpus in queue
+        train_queue = channel.queue_declare(
+            queue=settings.QUEUE_NAME_TRAIN,
+            durable=True,
+            exclusive=False,
+            auto_delete=False
+        )
+        if train_queue.method.message_count == 0:
+            self.logger.info('train_callback(): Dumping the classifier!')
+            pickle.dump(self.classifier, open(settings.CLASSIFIER_DUMP_FILEPATH, 'wb'))
 
     @staticmethod
     def get_stopwords():

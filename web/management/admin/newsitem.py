@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.conf import settings
+from django.core import serializers
 from rangefilter.filter import DateRangeFilter
 import pika
 
@@ -31,8 +32,7 @@ def corpus_create_positive(model_admin, request, query_set):
         corpus.positive = True
         corpus.save()
 
-    if query_set:
-        enqueue_corpus_creation()
+        enqueue_train(corpus)
 
 
 corpus_create_positive.short_description = 'Corpus - Create positive'
@@ -45,8 +45,7 @@ def corpus_create_negative(model_admin, request, query_set):
         corpus.positive = False
         corpus.save()
 
-    if query_set:
-        enqueue_corpus_creation()
+        enqueue_train(corpus)
 
 
 corpus_create_negative.short_description = 'Corpus - Create negative'
@@ -72,14 +71,16 @@ Unpublish and create negative Corpus
 '''
 
 
-def enqueue_corpus_creation():
+def enqueue_train(corpus):
+    body = serializers.serialize('json', [corpus])
+
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.QUEUE_HOSTNAME))
     channel = connection.channel()
     channel.queue_declare(queue=settings.QUEUE_NAME_TRAIN, durable=True)
     channel.basic_publish(
         exchange='',
         routing_key=settings.QUEUE_NAME_TRAIN,
-        body='',
+        body=body,
         properties=pika.BasicProperties(delivery_mode=2)
     )
 
